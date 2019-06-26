@@ -1,4 +1,4 @@
-from dnd35.core import Aggregator
+import dnd35.core
 
 
 class TestAggregator:
@@ -7,18 +7,17 @@ class TestAggregator:
             def __init__(self, x=1):
                 self.x = x
 
-        class Branch(Aggregator):
+        class Branch(dnd35.core.Aggregator):
             def __init__(self, x=3):
                 super().__init__()
                 self.x = x
                 self.leaf = Leaf()
 
-        class Root(Aggregator):
+        class Root(dnd35.core.Aggregator):
             def __init__(self, x=2):
                 super().__init__()
                 self._x = x
                 self.leaf = Leaf()
-                self.other_leaves = [Leaf(i) for i in range(10)]
                 self.branch = Branch()
 
             @property
@@ -26,4 +25,4 @@ class TestAggregator:
                 return self._x
 
         instance = Root()
-        assert instance.x == 52
+        assert instance.x == 7
