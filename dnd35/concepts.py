@@ -2,7 +2,7 @@
 
 from functools import total_ordering
 from itertools import chain, groupby
-from typing import Any, Tuple, List, Optional, Iterable, SupportsInt
+from typing import Any, Tuple, List, Optional, Iterable, SupportsInt, Iterator
 
 import dnd35.core as core
 
@@ -167,6 +167,9 @@ class Bonus:
         value = self._named.get(item, 0)
         return value
 
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._named)
+
     def __add__(self, other: 'Bonus') -> 'Bonus':
         try:
             new_conditional = self._conditional | other._conditional
@@ -196,6 +199,10 @@ class Bonus:
         return result
 
     __radd__ = __add__
+
+    @property
+    def conditional(self) -> Tuple[str, ...]:
+        return tuple(self._conditional)
 
 
 class Size:

@@ -94,3 +94,7 @@ class TestBonus:
     def test_conditional_string(self):
         bonus = concepts.Bonus('+1 if blind', racial=1)
         assert str(bonus) == '+1\n+1 if blind'
+
+    def test_iteration(self):
+        bonus = concepts.Bonus('+1 test', '+1 too', unnamed=3, dodge=2, racial=3)
+        assert set(bonus) == {'unnamed', 'dodge', 'racial'}
