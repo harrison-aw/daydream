@@ -111,7 +111,7 @@ class Dice:
 
 
 @total_ordering
-class Bonus:
+class Modifier:
     """A collection of modifiers to a particular value."""
 
     stackable = {'unnamed', 'dodge'}
@@ -146,7 +146,7 @@ class Bonus:
         return result
 
     def __eq__(self, other: Any) -> bool:
-        if isinstance(other, Bonus):
+        if isinstance(other, Modifier):
             result = (self.named() == other.named()
                       and self.conditional == other.conditional)
         else:
@@ -175,8 +175,8 @@ class Bonus:
         """Collection of name-bonus pairs."""
         return self._named.items()
 
-    def __add__(self, other: 'Bonus') -> 'Bonus':
-        if isinstance(other, Bonus):
+    def __add__(self, other: 'Modifier') -> 'Modifier':
+        if isinstance(other, Modifier):
             new_conditional = self._conditional | set(other.conditional)
             names_self = set(self._named)
             names_other = set(other)
@@ -359,9 +359,9 @@ class Race(core.Aggregator, ignore={'name'}):
         self.speed = speed
         self.languages = languages
 
-        self._fortitude = Bonus()
-        self._reflex = Bonus()
-        self._will = Bonus()
+        self._fortitude = Modifier()
+        self._reflex = Modifier()
+        self._will = Modifier()
 
         if bonus_languages is not None:
             self.bonus_languages = bonus_languages
@@ -372,39 +372,39 @@ class Race(core.Aggregator, ignore={'name'}):
         for feature, definition in features.items():
             setattr(self, feature, definition)
 
-    def _save_bonus(self, name: str) -> Bonus:
+    def _save_bonus(self, name: str) -> Modifier:
         try:
             generic = self.saving_throws
         except AttributeError:
-            generic = Bonus()
+            generic = Modifier()
 
         return generic + getattr(self, name)
 
     @property
-    def fortitude(self) -> Bonus:
+    def fortitude(self) -> Modifier:
         """Racial bonus to fortitude save."""
         return self._save_bonus('_fortitude')
 
     @fortitude.setter
-    def fortitude(self, bonus: Bonus) -> None:
+    def fortitude(self, bonus: Modifier) -> None:
         self._fortitude = bonus
 
     @property
-    def reflex(self) -> Bonus:
+    def reflex(self) -> Modifier:
         """Racial bonus to reflex save."""
         return self._save_bonus('_reflex')
 
     @reflex.setter
-    def reflex(self, bonus: Bonus) -> None:
+    def reflex(self, bonus: Modifier) -> None:
         self._reflex = bonus
 
     @property
-    def will(self) -> Bonus:
+    def will(self) -> Modifier:
         """Racial bonus to will save."""
         return self._save_bonus('_will')
 
     @will.setter
-    def will(self, bonus: Bonus) -> None:
+    def will(self, bonus: Modifier) -> None:
         self._will = bonus
 
 
@@ -416,10 +416,10 @@ class Class(core.Aggregator):
                  hit_die: Dice,
                  class_skills: List[str],
                  skill_points_per_level: int,
-                 base_attack_bonus: List[Bonus],
-                 fort_save: List[Bonus],
-                 ref_save: List[Bonus],
-                 will_save: List[Bonus],
+                 base_attack_bonus: List[Modifier],
+                 fort_save: List[Modifier],
+                 ref_save: List[Modifier],
+                 will_save: List[Modifier],
                  special: List[List[Any]],
                  **features: Any):
         super().__init__()
@@ -435,4 +435,4 @@ class Class(core.Aggregator):
         self.features = features
 
 
-__all__ = ['Bonus', 'Size', 'AbilityScore', 'Race']
+__all__ = ['Modifier', 'Size', 'AbilityScore', 'Race']

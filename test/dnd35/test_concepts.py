@@ -50,54 +50,54 @@ class TestDice:
 
 class TestBonus:
     def test_handles_simple_init(self):
-        bonus = concepts.Bonus(unnamed=10)
-        assert bonus == 10
+        modifier = concepts.Modifier(unnamed=10)
+        assert modifier == 10
 
     def test_handles_conditional(self):
-        bonus = concepts.Bonus('+1 racial bonus on attack rolls against orcs and goblinoids.')
-        assert bonus == 0
-        assert str(bonus) == '+1 racial bonus on attack rolls against orcs and goblinoids.'
+        modifier = concepts.Modifier('+1 racial bonus on attack rolls against orcs and goblinoids.')
+        assert modifier == 0
+        assert str(modifier) == '+1 racial bonus on attack rolls against orcs and goblinoids.'
 
     def test_repr_is_readable(self):
-        bonus = concepts.Bonus(unnamed=10)
-        assert repr(bonus) == 'Bonus(unnamed=10)'
+        modifier = concepts.Modifier(unnamed=10)
+        assert repr(modifier) == 'Modifier(unnamed=10)'
 
     def test_repr_is_evaluable(self):
-        bonus = concepts.Bonus('test conditional', racial=10)
-        repr_ = repr(bonus)
-        bonus2 = eval(repr_, {'Bonus': concepts.Bonus})
-        assert bonus == bonus2
+        modifier = concepts.Modifier('test conditional', racial=10)
+        repr_ = repr(modifier)
+        bonus2 = eval(repr_, {'Modifier': concepts.Modifier})
+        assert modifier == bonus2
 
     def test_hash_satisfies_equality(self):
-        bonus1 = concepts.Bonus('test', unnamed=2)
-        bonus2 = concepts.Bonus('test', unnamed=2)
+        bonus1 = concepts.Modifier('test', unnamed=2)
+        bonus2 = concepts.Modifier('test', unnamed=2)
         assert bonus1 == bonus2
         assert hash(bonus1) == hash(bonus2)
 
     def test_undefined_typed_bonuses_return_zero(self):
-        bonus = concepts.Bonus(dodge=3)
-        assert bonus['wrong'] == 0
+        modifier = concepts.Modifier(dodge=3)
+        assert modifier['wrong'] == 0
 
     def test_adding_bonuses(self):
-        bonus1 = concepts.Bonus('+1 test', '+1 too', unnamed=3, dodge=2, racial=3)
-        bonus2 = concepts.Bonus('+1 test', unnamed=1, dodge=2, racial=2)
+        modifier1 = concepts.Modifier('+1 test', '+1 too', unnamed=3, dodge=2, racial=3)
+        modifier2 = concepts.Modifier('+1 test', unnamed=1, dodge=2, racial=2)
 
-        bonus_sum = bonus1 + bonus2
+        sum_ = modifier1 + modifier2
 
-        desired = concepts.Bonus('+1 test', '+1 too', unnamed=4, dodge=4, racial=3)
-        assert bonus_sum == desired
+        desired = concepts.Modifier('+1 test', '+1 too', unnamed=4, dodge=4, racial=3)
+        assert sum_ == desired
 
     def test_bonus_string(self):
-        bonus = concepts.Bonus(dodge=3)
-        assert str(bonus) == '+3'
+        modifier = concepts.Modifier(dodge=3)
+        assert str(modifier) == '+3'
 
     def test_conditional_string(self):
-        bonus = concepts.Bonus('+1 if blind', racial=1)
-        assert str(bonus) == '+1\n+1 if blind'
+        modifier = concepts.Modifier('+1 if blind', racial=1)
+        assert str(modifier) == '+1\n+1 if blind'
 
     def test_iteration(self):
-        bonus = concepts.Bonus('+1 test', '+1 too', unnamed=3, dodge=2, racial=3)
-        assert set(bonus) == {'unnamed', 'dodge', 'racial'}
+        modifier = concepts.Modifier('+1 test', '+1 too', unnamed=3, dodge=2, racial=3)
+        assert set(modifier) == {'unnamed', 'dodge', 'racial'}
 
 
 class TestSize:
