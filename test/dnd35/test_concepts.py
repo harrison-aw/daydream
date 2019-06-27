@@ -98,3 +98,35 @@ class TestBonus:
     def test_iteration(self):
         bonus = concepts.Bonus('+1 test', '+1 too', unnamed=3, dodge=2, racial=3)
         assert set(bonus) == {'unnamed', 'dodge', 'racial'}
+
+
+class TestSize:
+    def test_repr_is_evaluable(self):
+        small = concepts.Size(-2)
+        assert eval(repr(small), {'Size': concepts.Size}) == small
+
+    def test_small_attack_bonus(self):
+        small = concepts.Size(-1)
+        assert small.attack_bonus == 1
+
+    def test_small_armor_class(self):
+        small = concepts.Size(-1)
+        assert small.armor_class == 1
+
+    def test_small_grapple(self):
+        small = concepts.Size(-1)
+        assert small.grapple == -4
+
+    def test_small_hide(self):
+        small = concepts.Size(-1)
+        assert small.hide == 4
+
+
+class TestAbilityScore:
+    def test_positive_modifier(self):
+        score = concepts.AbilityScore(17)
+        assert score.modifier == 3
+
+    def test_negative_modifier(self):
+        score = concepts.AbilityScore(7)
+        assert score.modifier == -2

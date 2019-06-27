@@ -2,7 +2,8 @@
 
 from functools import total_ordering
 from itertools import chain, groupby
-from typing import Any, Tuple, List, Optional, Iterable, SupportsInt, Iterator
+from typing import Any, Tuple, List, Optional, Iterable, SupportsInt, Iterator, \
+    AbstractSet, FrozenSet, Set
 
 import dnd35.core as core
 
@@ -146,8 +147,8 @@ class Bonus:
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Bonus):
-            result = (self._named == other._named
-                      and self._conditional == other._conditional)
+            result = (self.named() == other.named()
+                      and self.conditional == other.conditional)
         else:
             result = int(self) == other
         return result
@@ -170,14 +171,16 @@ class Bonus:
     def __iter__(self) -> Iterator[str]:
         return iter(self._named)
 
+    def named(self) -> AbstractSet[Tuple[str, int]]:
+        """Collection of name-bonus pairs."""
+        return self._named.items()
+
     def __add__(self, other: 'Bonus') -> 'Bonus':
-        try:
-            new_conditional = self._conditional | other._conditional
+        if isinstance(other, Bonus):
+            new_conditional = self._conditional | set(other.conditional)
             names_self = set(self._named)
-            names_other = set(other._named)
-        except AttributeError:
-            result = NotImplemented
-        else:
+            names_other = set(other)
+
             self_only = names_self - names_other
             other_only = names_other - names_self
             both = names_self & names_other
@@ -186,68 +189,71 @@ class Bonus:
             for name in self_only:
                 new_named[name] = self._named[name]
             for name in other_only:
-                new_named[name] = other._named[name]
+                new_named[name] = other[name]
 
             for name in both:
                 if name in self.stackable:
-                    new_named[name] = self._named[name] + other._named[name]
+                    new_named[name] = self._named[name] + other[name]
                 else:
-                    new_named[name] = max(self._named[name], other._named[name])
+                    new_named[name] = max(self._named[name], other[name])
 
             result = type(self)(*new_conditional, **new_named)
+        else:
+            result = NotImplemented
 
         return result
 
     __radd__ = __add__
 
     @property
-    def conditional(self) -> Tuple[str, ...]:
-        return tuple(self._conditional)
+    def conditional(self) -> FrozenSet[str]:
+        """Conditional bonuses."""
+        return frozenset(self._conditional)
 
 
 class Size:
     """Size of a creature."""
 
     def __init__(self, modifier: int) -> None:
-        self.__modifier = modifier
+        self._modifier = modifier
 
     def __repr__(self) -> str:
-        return f'{type(self).__name__}({self.__modifier})'
+        return f'{type(self).__name__}({self._modifier})'
 
     def __eq__(self, other: Any) -> bool:
-        try:
-            result = self.__modifier == other.modifier
-        except AttributeError:
-            result = self.__modifier == other
+        if isinstance(other, Size):
+            result = self._modifier == other.modifier
+        else:
+            result = NotImplemented
         return result
 
     def __hash__(self) -> int:
-        return hash(('Size', self.__modifier))
+        return hash(('Size', self._modifier))
 
     @property
     def modifier(self) -> int:
         """Base modifier."""
-        return self.__modifier
+        return self._modifier
 
     @property
     def attack_bonus(self) -> int:
         """Attack bonus modifier."""
-        return self.__modifier
+        return -self._modifier
 
     @property
     def armor_class(self) -> int:
         """Armor class modifier."""
-        return self.__modifier
+        return -self._modifier
 
     @property
     def grapple(self) -> int:
         """Grapple attack modifier."""
-        return -2 * self.__modifier
+        return 4 * self._modifier
 
     @property
     def hide(self) -> int:
         """Hide modifier."""
-        return 2 * self.__modifier
+        return -4 * self._modifier
 
 
 class AbilityScore:
@@ -303,15 +309,34 @@ class Special(core.Aggregator, ignore={'name', 'description'}):
                  **features: Any) -> None:
         super().__init__()
 
-        self.name = name
-        self.parameter = parameter
-        self.description = description
+        self._name = name
+        self._parameter = parameter
+        self._description = description
+        self._features: Set[str] = set()
 
         for feature, definition in features.items():
             setattr(self, feature, definition)
 
+    def __setattr__(self, name: str, value: Any) -> None:
+        super().__setattr__(name, value)
+        if not name.startswith('_'):
+            self._features.add(name)
+
+    def __repr__(self) -> str:
+        class_name = type(self).__name__
+        features = ', '.join(f'{name}={getattr(self, name)}' for name in self._features)
+
+        prefix = f'{class_name}({self._name}, {self._parameter}, {self._description}'
+        if features:
+            result = prefix + ', ' + features + ')'
+        else:
+            result = prefix + ')'
+        return result
+
 
 class Race(core.Aggregator, ignore={'name'}):
+    """Data used to define a character race."""
+
     favored_class = 'Any'
 
     bonus_languages = ['Abyssal', 'Aquan', 'Auran', 'Celestial', 'Common',
