@@ -313,9 +313,9 @@ class AbilityScore:
         return result
 
     @property
-    def modifier(self) -> int:
+    def modifier(self) -> Modifier:
         """Modifier associated with the ability score."""
-        return (self.score - 10) // 2
+        return Modifier(ability=(self.score - 10) // 2)
 
 
 class Special(core.Aggregator, ignore={'name', 'description'}):
