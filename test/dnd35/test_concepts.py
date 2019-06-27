@@ -20,11 +20,6 @@ class TestDice:
         new_dice = eval(repr_, {'Dice': concepts.Dice})
         assert dice == new_dice
 
-    def test_hash_matches(self):
-        dice1 = concepts.Dice(3, None, [(6, 6)])
-        dice2 = concepts.Dice(3, None, [(6, 6)])
-        assert hash(dice1) == hash(dice2)
-
     def test_add_dice_pools(self):
         dice1 = concepts.Dice(3, None, [(6, 6)])
         dice2 = concepts.Dice(3, None, [(6, 6)])
@@ -67,12 +62,6 @@ class TestModifier:
         repr_ = repr(modifier)
         bonus2 = eval(repr_, {'Modifier': concepts.Modifier})
         assert modifier == bonus2
-
-    def test_hash_satisfies_equality(self):
-        bonus1 = concepts.Modifier('test', unnamed=2)
-        bonus2 = concepts.Modifier('test', unnamed=2)
-        assert bonus1 == bonus2
-        assert hash(bonus1) == hash(bonus2)
 
     def test_undefined_typed_bonuses_return_zero(self):
         modifier = concepts.Modifier(dodge=3)

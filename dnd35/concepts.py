@@ -61,9 +61,6 @@ class Dice:
             result = NotImplemented
         return result
 
-    def __hash__(self) -> int:
-        return hash(('Dice', tuple(self._pool)))
-
     def __repr__(self) -> str:
         if len(self._pool) == 1:
             side_count, dice_count = self._pool[0]
@@ -153,11 +150,6 @@ class Modifier:
             result = int(self) == other
         return result
 
-    def __hash__(self) -> int:
-        conditional = tuple(sorted(self._conditional))
-        typed = tuple(self._named.items())
-        return hash(('Bonus', conditional, typed))
-
     def __lt__(self, other: Any) -> bool:
         return int(self) < other
 
@@ -205,22 +197,26 @@ class Modifier:
 
     __radd__ = __add__
 
+    @property
+    def _has_unique_named(self) -> bool:
+        return self._conditional or len(self._named) != 1
+
+    @property
+    def _unique(self) -> Tuple[str, int]:
+        return next(iter(self._named.items()))
+
     def __mul__(self, other: int) -> 'Modifier':
-        if self._conditional or len(self._named) != 1:
+        if self._has_unique_named:
             raise ValueError('Multiplication of compound modifier is ambiguous')
-
-        name, value = next(iter(self._named.items()))
-
+        name, value = self._unique
         return Modifier(**{name: other * value})
 
     __rmul__ = __mul__
 
     def __neg__(self) -> 'Modifier':
-        if self._conditional or len(self._named) != 1:
-            raise ValueError('Multiplication of compound modifier is ambiguous')
-
-        name, value = next(iter(self._named.items()))
-
+        if self._has_unique_named:
+            raise ValueError('Negation of compound modifier is ambiguous')
+        name, value = self._unique
         return Modifier(**{name: -value})
 
     @property
@@ -245,9 +241,6 @@ class Size:
         else:
             result = NotImplemented
         return result
-
-    def __hash__(self) -> int:
-        return hash(('Size', self._modifier))
 
     @property
     def modifier(self) -> Modifier:
