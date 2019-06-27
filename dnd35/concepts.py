@@ -382,6 +382,7 @@ class Race(core.Aggregator, ignore={'name'}):
 
     @property
     def fortitude(self) -> Bonus:
+        """Racial bonus to fortitude save."""
         return self._save_bonus('_fortitude')
 
     @fortitude.setter
@@ -390,6 +391,7 @@ class Race(core.Aggregator, ignore={'name'}):
 
     @property
     def reflex(self) -> Bonus:
+        """Racial bonus to reflex save."""
         return self._save_bonus('_reflex')
 
     @reflex.setter
@@ -398,6 +400,7 @@ class Race(core.Aggregator, ignore={'name'}):
 
     @property
     def will(self) -> Bonus:
+        """Racial bonus to will save."""
         return self._save_bonus('_will')
 
     @will.setter
@@ -406,6 +409,8 @@ class Race(core.Aggregator, ignore={'name'}):
 
 
 class Class(core.Aggregator):
+    """A character class."""
+
     def __init__(self,
                  alignment_restriction: Optional[List[str]],
                  hit_die: Dice,
@@ -422,6 +427,12 @@ class Class(core.Aggregator):
         self.hit_die = hit_die
         self.class_skills = class_skills
         self.skill_points_per_level = skill_points_per_level
+        self.base_attack_bonus = base_attack_bonus
+        self.fort_save = fort_save
+        self.ref_save = ref_save
+        self.will_save = will_save
+        self.special = special
+        self.features = features
 
 
 __all__ = ['Bonus', 'Size', 'AbilityScore', 'Race']
