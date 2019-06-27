@@ -48,7 +48,7 @@ class TestDice:
         assert dice.average == 68.0
 
 
-class TestBonus:
+class TestModifier:
     def test_handles_simple_init(self):
         modifier = concepts.Modifier(unnamed=10)
         assert modifier == 10
