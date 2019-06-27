@@ -107,6 +107,10 @@ class Dice:
         return tuple(self._pool)
 
 
+class AmbiguousOperationError(core.DayDreamError):
+    """Error for issues with ambiguous operations."""
+
+
 @total_ordering
 class Modifier:
     """A collection of modifiers to a particular value."""
@@ -198,7 +202,7 @@ class Modifier:
     __radd__ = __add__
 
     @property
-    def _has_unique_named(self) -> bool:
+    def is_simple(self) -> bool:
         return self._conditional or len(self._named) != 1
 
     @property
@@ -206,16 +210,16 @@ class Modifier:
         return next(iter(self._named.items()))
 
     def __mul__(self, other: int) -> 'Modifier':
-        if self._has_unique_named:
-            raise ValueError('Multiplication of compound modifier is ambiguous')
+        if self.is_simple:
+            raise AmbiguousOperationError('Multiplication of unspecified or complex modifier is ambiguous')
         name, value = self._unique
         return Modifier(**{name: other * value})
 
     __rmul__ = __mul__
 
     def __neg__(self) -> 'Modifier':
-        if self._has_unique_named:
-            raise ValueError('Negation of compound modifier is ambiguous')
+        if self.is_simple:
+            raise AmbiguousOperationError('Negation of unspecified or complex modifier is ambiguous')
         name, value = self._unique
         return Modifier(**{name: -value})
 
