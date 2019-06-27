@@ -102,7 +102,7 @@ class TestModifier:
 
 class TestSize:
     def test_repr_is_evaluable(self):
-        small = concepts.Size(-2)
+        small = concepts.Size(-1)
         assert eval(repr(small), {'Size': concepts.Size}) == small
 
     def test_small_attack_bonus(self):

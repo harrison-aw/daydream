@@ -205,6 +205,24 @@ class Modifier:
 
     __radd__ = __add__
 
+    def __mul__(self, other: int) -> 'Modifier':
+        if self._conditional or len(self._named) != 1:
+            raise ValueError('Multiplication of compound modifier is ambiguous')
+
+        name, value = next(iter(self._named.items()))
+
+        return Modifier(**{name: other * value})
+
+    __rmul__ = __mul__
+
+    def __neg__(self) -> 'Modifier':
+        if self._conditional or len(self._named) != 1:
+            raise ValueError('Multiplication of compound modifier is ambiguous')
+
+        name, value = next(iter(self._named.items()))
+
+        return Modifier(**{name: -value})
+
     @property
     def conditional(self) -> FrozenSet[str]:
         """Conditional bonuses."""
@@ -215,10 +233,11 @@ class Size:
     """Size of a creature."""
 
     def __init__(self, modifier: int) -> None:
-        self._modifier = modifier
+        self._modifier = Modifier(size=modifier)
 
     def __repr__(self) -> str:
-        return f'{type(self).__name__}({self._modifier})'
+        modifier = self._modifier['size']
+        return f'{type(self).__name__}({modifier})'
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Size):
@@ -231,29 +250,29 @@ class Size:
         return hash(('Size', self._modifier))
 
     @property
-    def modifier(self) -> int:
+    def modifier(self) -> Modifier:
         """Base modifier."""
         return self._modifier
 
     @property
-    def attack_bonus(self) -> int:
+    def attack_bonus(self) -> Modifier:
         """Attack bonus modifier."""
         return -self._modifier
 
     @property
-    def armor_class(self) -> int:
+    def armor_class(self) -> Modifier:
         """Armor class modifier."""
         return -self._modifier
 
     @property
-    def grapple(self) -> int:
+    def grapple(self) -> Modifier:
         """Grapple attack modifier."""
-        return 4 * self._modifier
+        return self._modifier * 4
 
     @property
-    def hide(self) -> int:
+    def hide(self) -> Modifier:
         """Hide modifier."""
-        return -4 * self._modifier
+        return self._modifier * -4
 
 
 class AbilityScore:
