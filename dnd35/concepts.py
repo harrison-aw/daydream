@@ -332,7 +332,7 @@ class AbilityScore:
         return result
 
 
-class Special(core.Aggregator, ignore={'name', 'description'}):
+class Special(core.Aggregator, ignore={'name', 'description', 'progression'}):
     """Special abilities."""
 
     def __init__(self,
@@ -364,13 +364,6 @@ class Special(core.Aggregator, ignore={'name', 'description'}):
             result = prefix + ', ' + features + ')'
         else:
             result = prefix + ')'
-        return result
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, Special):
-            result = self.name == other.name
-        else:
-            result = NotImplemented
         return result
 
     def __getitem__(self, item: int) -> Any:
