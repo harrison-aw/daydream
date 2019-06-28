@@ -1,9 +1,10 @@
 """Implements basic concepts used in defining game entities."""
 
+from collections import Counter
 from functools import total_ordering
 from itertools import chain, groupby
 from typing import Any, Tuple, List, Optional, Iterable, SupportsInt, Iterator, \
-    Set, Sequence
+    Set, Sequence, Dict
 
 import dnd35.core as core
 
@@ -232,7 +233,7 @@ class Progression:
             suffix = f', {values})'
         else:
             suffix = ')'
-        return f'{type(self).__name__}({self.modifier_name}' + suffix
+        return f"{type(self).__name__}('{self.modifier_name}'" + suffix
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Progression):
@@ -473,6 +474,25 @@ class Class(core.Aggregator):
         self._will_save = will_save
         self._special = special
         self._features = features
+
+
+class Feat:
+    """Ability chosen every few levels or granted by a class."""
+
+
+class Character(core.Aggregator, ignore={'classes'}):
+    """A character of some level."""
+
+    def __init__(self, race: Race, classes: Dict[Class, int], feats: Sequence[Feat]) -> None:
+        super().__init__()
+
+        self.race = race
+        self.classes = Counter(classes)
+        self.feats = list(feats)
+
+    @property
+    def level(self) -> int:
+        return len(self.classes)
 
 
 __all__ = ['Modifier', 'Size', 'AbilityScore', 'Race']

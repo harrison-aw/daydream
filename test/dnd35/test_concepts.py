@@ -66,8 +66,8 @@ class TestModifier:
     def test_repr_is_evaluable(self):
         modifier = concepts.Modifier('test conditional', racial=10)
         repr_ = repr(modifier)
-        bonus2 = eval(repr_, {'Modifier': concepts.Modifier})
-        assert modifier == bonus2
+        modifier_evaluated = eval(repr_, {'Modifier': concepts.Modifier})
+        assert modifier == modifier_evaluated
 
     def test_undefined_typed_bonuses_return_zero(self):
         modifier = concepts.Modifier(dodge=3)
@@ -99,6 +99,12 @@ class TestProgression:
     def test_create_save(self):
         good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
         assert good_save[2] == concepts.Modifier(save=3)
+
+    def test_repr_evaluates(self):
+        good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
+        repr_ = repr(good_save)
+        save_evaluated = eval(repr_, {'Progression': concepts.Progression})
+        assert good_save == save_evaluated
 
 
 class TestSize:
