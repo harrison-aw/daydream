@@ -3,13 +3,13 @@
 from functools import total_ordering
 from itertools import chain, groupby
 from typing import Any, Tuple, List, Optional, Iterable, SupportsInt, Iterator, \
-    FrozenSet, Set, Sequence
+    Set, Sequence
 
 import dnd35.core as core
 
-_DiceCounts = Tuple[int, Optional[int]]
-_AbstractDicePool = Iterable[_DiceCounts]
-_DicePool = List[_DiceCounts]
+DiceCounts = Tuple[int, Optional[int]]
+AbstractDicePool = Iterable[DiceCounts]
+DicePool = List[DiceCounts]
 
 
 class BadDiceError(core.DayDreamError):
@@ -22,55 +22,53 @@ class Dice:
     def __init__(self,
                  side_count: Optional[int] = None,
                  die_count: Optional[int] = None,
-                 pool: Optional[_AbstractDicePool] = None) -> None:
+                 pool: Optional[AbstractDicePool] = None) -> None:
         if side_count is None:
             if die_count is None:
-                self._pool: _DicePool = []
+                self.pool: DicePool = []
             else:
                 raise BadDiceError('Cannot create dice with an unspecified number of sides.')
         else:
-            self._pool = [(side_count, die_count)]
+            self.pool = [(side_count, die_count)]
 
         if pool is not None:
-            self._pool = self._combine(self._pool, pool)
+            self.pool = self._combine(self.pool, pool)
 
     @property
     def average(self) -> float:
         """Average dice roll."""
         result = 0.
-        for side_count, dice_count in self._pool:
+        for side_count, dice_count in self.pool:
             if dice_count is None:
                 dice_count = 1
             result += dice_count * (side_count + 1) / 2
         return result
 
-    @property
-    def pool(self) -> Tuple[_DiceCounts, ...]:
-        """The encoded version of the dice pool."""
-        return tuple(self._pool)
-
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Dice):
-            result = self.pool == other.pool
+            result = set(self.pool) == set(other.pool)
         else:
             result = NotImplemented
         return result
 
+    def __hash__(self) -> int:
+        return hash((type(self).__name__, tuple(self.pool)))
+
     def __repr__(self) -> str:
-        if len(self._pool) == 1:
-            side_count, dice_count = self._pool[0]
+        if len(self.pool) == 1:
+            side_count, dice_count = self.pool[0]
             if dice_count is None:
                 args = f'{side_count}'
             else:
                 args = f'{side_count}, {dice_count}'
         else:
-            args = f'pool={self._pool}'
+            args = f'pool={self.pool}'
 
         return f'{type(self).__name__}({args})'
 
     def __str__(self) -> str:
         terms = []
-        for side_count, dice_count in self._pool:
+        for side_count, dice_count in self.pool:
             if dice_count is None:
                 terms.append(f'd{side_count}')
             else:
@@ -80,19 +78,19 @@ class Dice:
 
     def __add__(self, other: 'Dice') -> 'Dice':
         if isinstance(other, Dice):
-            result = Dice(pool=self._combine(self._pool, other.pool))
+            result = Dice(pool=self._combine(self.pool, other.pool))
         else:
             result = NotImplemented
 
         return result
 
     @staticmethod
-    def _combine(first_pool: _AbstractDicePool, second_pool: _AbstractDicePool,
-                 _key=lambda c: c[0]) -> _DicePool:
+    def _combine(first_pool: AbstractDicePool, second_pool: AbstractDicePool,
+                 _key=lambda c: c[0]) -> DicePool:
         """Combine two dice pools."""
-        result: _DicePool = []
+        result: DicePool = []
 
-        combinable: _DicePool = []
+        combinable: DicePool = []
         for side_count, dice_count in chain(first_pool, second_pool):
             if dice_count is None:
                 result.append((side_count, dice_count))
@@ -120,33 +118,23 @@ class Modifier:
     def __init__(self, *conditional: str, **named: int) -> None:
         super().__init__()
 
-        self._conditional = set(conditional)
-        self._named = named
-
-    @property
-    def conditional(self) -> FrozenSet[str]:
-        """Conditional bonuses."""
-        return frozenset(self._conditional)
-
-    @property
-    def named(self) -> Set[Tuple[str, int]]:
-        """Collection of name-bonus pairs."""
-        return set(self._named.items())
+        self.conditional = set(conditional)
+        self.named = named
 
     @property
     def is_simple(self) -> bool:
         """True if instance represents a single named, unconditional modifier."""
-        return self._conditional or len(self._named) != 1
+        return self.conditional or len(self.named) != 1
 
     def __repr__(self) -> str:
-        conditional = ', '.join(repr(c) for c in self._conditional)
-        named = ', '.join(f'{name}={val}' for name, val in self._named.items())
+        conditional = ', '.join(repr(c) for c in self.conditional)
+        named = ', '.join(f'{name}={val}' for name, val in self.named.items())
         args = ', '.join(a for a in [conditional, named] if a)
         return f'{type(self).__name__}({args})'
 
     def __str__(self) -> str:
-        conditional = '\n'.join(self._conditional)
-        named = sum(v for v in self._named.values())
+        conditional = '\n'.join(self.conditional)
+        named = sum(v for v in self.named.values())
 
         if named == 0:
             if conditional:
@@ -173,19 +161,19 @@ class Modifier:
         return int(self) < other
 
     def __int__(self) -> int:
-        return sum(bonus for bonus in self._named.values())
+        return sum(bonus for bonus in self.named.values())
 
     def __getitem__(self, item: str) -> int:
-        value = self._named.get(item, 0)
+        value = self.named.get(item, 0)
         return value
 
     def __iter__(self) -> Iterator[str]:
-        return iter(self._named)
+        return iter(self.named)
 
     def __add__(self, other: 'Modifier') -> 'Modifier':
         if isinstance(other, Modifier):
-            new_conditional = self._conditional | set(other.conditional)
-            names_self = set(self._named)
+            new_conditional = self.conditional | set(other.conditional)
+            names_self = set(self.named)
             names_other = set(other)
 
             self_only = names_self - names_other
@@ -194,15 +182,15 @@ class Modifier:
 
             new_named = {}
             for name in self_only:
-                new_named[name] = self._named[name]
+                new_named[name] = self.named[name]
             for name in other_only:
                 new_named[name] = other[name]
 
             for name in both:
                 if name in self.stackable:
-                    new_named[name] = self._named[name] + other[name]
+                    new_named[name] = self.named[name] + other[name]
                 else:
-                    new_named[name] = max(self._named[name], other[name])
+                    new_named[name] = max(self.named[name], other[name])
 
             result = type(self)(*new_conditional, **new_named)
         else:
@@ -228,23 +216,23 @@ class Modifier:
 
     @property
     def _unique(self) -> Tuple[str, int]:
-        return next(iter(self._named.items()))
+        return next(iter(self.named.items()))
 
 
 class Progression:
     """A progression of modifiers."""
 
     def __init__(self, modifier_name: str, *values: int) -> None:
-        self._modifier_name = modifier_name
-        self._modifiers = [Modifier(**{modifier_name: v}) for v in values]
+        self.modifier_name = modifier_name
+        self.modifiers = [Modifier(**{modifier_name: v}) for v in values]
 
     def __repr__(self) -> str:
-        values = ', '.join(str(int(m)) for m in self._modifiers)
+        values = ', '.join(str(int(m)) for m in self.modifiers)
         if values:
             suffix = f', {values})'
         else:
             suffix = ')'
-        return f'{type(self).__name__}({self._modifier_name}' + suffix
+        return f'{type(self).__name__}({self.modifier_name}' + suffix
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Progression):
@@ -254,53 +242,48 @@ class Progression:
         return result
 
     def __len__(self) -> int:
-        return len(self._modifiers)
+        return len(self.modifiers)
 
     def __getitem__(self, item: int) -> Modifier:
-        return self._modifiers[item]
+        return self.modifiers[item]
 
     def __iter__(self) -> Iterator[Modifier]:
-        return iter(self._modifiers)
+        return iter(self.modifiers)
 
 
 class Size:
     """Size of a creature."""
 
     def __init__(self, modifier: int) -> None:
-        self._modifier = Modifier(size=modifier)
-
-    @property
-    def modifier(self) -> Modifier:
-        """Base modifier."""
-        return self._modifier
+        self.modifier = Modifier(size=modifier)
 
     @property
     def attack_bonus(self) -> Modifier:
         """Attack bonus modifier."""
-        return -self._modifier
+        return -self.modifier
 
     @property
     def armor_class(self) -> Modifier:
         """Armor class modifier."""
-        return -self._modifier
+        return -self.modifier
 
     @property
     def grapple(self) -> Modifier:
         """Grapple attack modifier."""
-        return self._modifier * 4
+        return self.modifier * 4
 
     @property
     def hide(self) -> Modifier:
         """Hide modifier."""
-        return self._modifier * -4
+        return self.modifier * -4
 
     def __repr__(self) -> str:
-        modifier = self._modifier['size']
+        modifier = self.modifier['size']
         return f'{type(self).__name__}({modifier})'
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Size):
-            result = self._modifier == other.modifier
+            result = self.modifier == other.modifier
         else:
             result = NotImplemented
         return result
@@ -359,8 +342,8 @@ class Special(core.Aggregator, ignore={'name', 'description'}):
                  **features: Any) -> None:
         super().__init__()
 
-        self._name = name
-        self._description = description
+        self.name = name
+        self.description = description
         if progression is None:
             self._progression = []
         else:
@@ -369,16 +352,6 @@ class Special(core.Aggregator, ignore={'name', 'description'}):
 
         for feature, definition in features.items():
             setattr(self, feature, definition)
-
-    @property
-    def name(self) -> str:
-        """Name of special ability."""
-        return self._name
-
-    @property
-    def description(self) -> str:
-        """Description of special ability."""
-        return self._description
 
     def __setattr__(self, name: str, value: Any) -> None:
         super().__setattr__(name, value)
@@ -389,7 +362,7 @@ class Special(core.Aggregator, ignore={'name', 'description'}):
         class_name = type(self).__name__
         features = ', '.join(f'{name}={getattr(self, name)}' for name in self._features)
 
-        prefix = f'{class_name}({self._name}, {self._parameter}, {self._description}'
+        prefix = f'{class_name}({self.name}, {self._parameter}, {self.description}'
         if features:
             result = prefix + ', ' + features + ')'
         else:
@@ -450,15 +423,27 @@ class Race(core.Aggregator, ignore={'name'}):
         """Racial bonus to fortitude save."""
         return self._save_bonus('_fortitude')
 
+    @fortitude.setter
+    def fortitude(self, modifier: Modifier) -> None:
+        self._fortitude = modifier
+
     @property
     def reflex(self) -> Modifier:
         """Racial bonus to reflex save."""
         return self._save_bonus('_reflex')
 
+    @reflex.setter
+    def reflex(self, modifier: Modifier) -> None:
+        self._reflex = modifier
+
     @property
     def will(self) -> Modifier:
         """Racial bonus to will save."""
         return self._save_bonus('_will')
+
+    @will.setter
+    def will(self, modifier: Modifier) -> None:
+        self._will = modifier
 
     def _save_bonus(self, name: str) -> Modifier:
         try:

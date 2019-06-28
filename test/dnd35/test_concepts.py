@@ -10,6 +10,12 @@ class TestDice:
         dice = concepts.Dice(8, 4)
         assert str(dice) == '4d8'
 
+    def test_hash(self):
+        dice1 = concepts.Dice(8, 4, pool=[(6, 10)])
+        dice2 = concepts.Dice(pool=[(6, 10), (8, 4)])
+        assert dice1 == dice2
+        assert hash(dice1) == hash(dice2)
+
     def test_create_larger_dice_pool(self):
         dice = concepts.Dice(3, None, [(6, 6), (8, 10)])
         assert str(dice) == 'd3 + 6d6 + 10d8'
@@ -87,6 +93,12 @@ class TestModifier:
     def test_iteration(self):
         modifier = concepts.Modifier('+1 test', '+1 too', unnamed=3, dodge=2, racial=3)
         assert set(modifier) == {'unnamed', 'dodge', 'racial'}
+
+
+class TestProgression:
+    def test_create_save(self):
+        good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
+        assert good_save[2] == concepts.Modifier(save=3)
 
 
 class TestSize:
