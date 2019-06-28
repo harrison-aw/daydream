@@ -203,6 +203,7 @@ class Modifier:
 
     @property
     def is_simple(self) -> bool:
+        """True if instance represents a single named, unconditional modifier."""
         return self._conditional or len(self._named) != 1
 
     @property
@@ -315,7 +316,7 @@ class AbilityScore:
         return Modifier(ability=(self.score - 10) // 2)
 
 
-class Special(core.Aggregator, ignore={'name', 'description'}):
+class Special(core.Aggregator, ignore={'name'}):
     """Special abilities."""
 
     def __init__(self,
