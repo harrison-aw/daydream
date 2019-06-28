@@ -124,7 +124,7 @@ class Modifier:
     @property
     def is_simple(self) -> bool:
         """True if instance represents a single named, unconditional modifier."""
-        return self.conditional or len(self.named) != 1
+        return bool(self.conditional) or len(self.named) != 1
 
     def __repr__(self) -> str:
         conditional = ', '.join(repr(c) for c in self.conditional)
@@ -344,12 +344,9 @@ class Special(core.Aggregator, ignore={'name', 'description'}):
 
         self.name = name
         self.description = description
-        if progression is None:
-            self._progression = []
-        else:
-            self._progression = progression
-        self._features: Set[str] = set()
+        self.progression = progression
 
+        self._features: Set[str] = set()
         for feature, definition in features.items():
             setattr(self, feature, definition)
 
@@ -377,7 +374,10 @@ class Special(core.Aggregator, ignore={'name', 'description'}):
         return result
 
     def __getitem__(self, item: int) -> Any:
-        return self._progression[item]
+        if self.progression is None:
+            raise IndexError('Special ability does not have a progression.')
+
+        return self.progression[item]
 
 
 class Race(core.Aggregator, ignore={'name'}):
@@ -385,10 +385,11 @@ class Race(core.Aggregator, ignore={'name'}):
 
     favored_class = 'Any'
 
-    bonus_languages = ['Abyssal', 'Aquan', 'Auran', 'Celestial', 'Common',
-                       'Draconic', 'Dwarven', 'Elven', 'Giant', 'Gnome',
-                       'Goblin', 'Gnoll', 'Halfling', 'Ignan', 'Infernal',
-                       'Orc', 'Sylvan', 'Terran', 'Undercommon']
+    bonus_languages = [
+        'Abyssal', 'Aquan', 'Auran', 'Celestial', 'Common', 'Draconic',
+        'Dwarven', 'Elven', 'Giant', 'Gnome', 'Goblin', 'Gnoll', 'Halfling',
+        'Ignan', 'Infernal', 'Orc', 'Sylvan', 'Terran', 'Undercommon'
+    ]
 
     def __init__(self,
                  name: str,
@@ -410,7 +411,7 @@ class Race(core.Aggregator, ignore={'name'}):
         self._will = Modifier()
 
         if bonus_languages is not None:
-            self.bonus_languages = bonus_languages
+            self.bonus_languages = list(bonus_languages)
 
         if favored_class is not None:
             self.favored_class = favored_class
