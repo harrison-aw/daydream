@@ -137,3 +137,7 @@ class TestAbilityScore:
     def test_negative_modifier(self):
         score = concepts.AbilityScore(7)
         assert score.modifier == -2
+
+
+class TestSpecial:
+    pass

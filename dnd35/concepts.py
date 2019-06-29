@@ -492,6 +492,7 @@ class Character(core.Aggregator, ignore={'classes'}):
 
     @property
     def level(self) -> int:
+        """The characters level."""
         return len(self.classes)
 
 
