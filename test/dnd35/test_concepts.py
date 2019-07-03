@@ -153,6 +153,10 @@ class TestAbilityType:
                             {'AbilityType': concepts.AbilityType})
         assert ability == ability_copy
 
+    def test_str(self):
+        ability = concepts.AbilityType('Supernatural', 'Su')
+        assert str(ability) == 'Supernatural (Su)'
+
 
 class TestSpecial:
     pass

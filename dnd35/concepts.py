@@ -351,6 +351,12 @@ class AbilityType:
             result = NotImplemented
         return result
 
+    def __str__(self) -> str:
+        result = self.name
+        if self.abbreviation is not None:
+            result += f' ({self.abbreviation})'
+        return result
+
 
 class Ability(core.Aggregator,
               ignore={'name', 'ability_type', 'description', 'progression'}):
