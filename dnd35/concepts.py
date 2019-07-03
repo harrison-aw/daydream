@@ -217,6 +217,7 @@ class Modifier:
 
     @property
     def _unique(self) -> Tuple[str, int]:
+        # noinspection PyTypeChecker
         return next(iter(self.named.items()))
 
 
@@ -359,21 +360,19 @@ class AbilityType:
 
 
 class Ability(core.Aggregator,
-              ignore={'name', 'ability_type', 'description', 'progression'}):
+              ignore={'name', 'ability_type', 'description'}):
     """Character abilities."""
 
     def __init__(self,
                  name: str,
                  ability_type: Optional[AbilityType] = None,
                  description: str = '',
-                 progression: Optional[Sequence] = None,
                  **features: Any) -> None:
         super().__init__()
 
         self.name = name
         self.ability_type = ability_type
         self.description = description
-        self.progression = progression
 
         self._features: Set[str] = set()
         for feature, definition in features.items():
@@ -381,7 +380,7 @@ class Ability(core.Aggregator,
 
     def __setattr__(self, name: str, value: Any) -> None:
         super().__setattr__(name, value)
-        if not name.startswith('_'):
+        if not name.startswith('_') and name not in self._ignore:
             self._features.add(name)
 
     def __repr__(self) -> str:

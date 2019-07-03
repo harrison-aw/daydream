@@ -158,5 +158,17 @@ class TestAbilityType:
         assert str(ability) == 'Supernatural (Su)'
 
 
-class TestSpecial:
-    pass
+class TestAbility:
+    def test_static_ability(self):
+        stonecunning = concepts.Ability(
+            'Stonecunning',
+            search=concepts.Modifier('+2 racial bonus to notice '
+                                     'unusual stonework')
+        )
+        assert str(stonecunning.search) == '+2 racial bonus to notice' \
+                                           ' unusual stonework'
+
+    def test_sneak_attack(self):
+        sneak_attack = concepts.Ability(
+            'Sneak attack',
+        )
