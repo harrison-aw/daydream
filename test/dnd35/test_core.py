@@ -1,3 +1,5 @@
+# pylint: disable=W,C,R
+
 import dnd35.core
 
 

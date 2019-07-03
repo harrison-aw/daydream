@@ -333,17 +333,39 @@ class AbilityScore:
         return result
 
 
-class Special(core.Aggregator, ignore={'name', 'description', 'progression'}):
-    """Special abilities."""
+class AbilityType:
+    """A type classification for abilities."""
+
+    def __init__(self, name: str, abbreviation: Optional[str] = None) -> None:
+        self.name = name
+        self.abbreviation = abbreviation
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({repr(self.name)}, {repr(self.abbreviation)})"
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, AbilityType):
+            result = (self.name == other.name
+                      and self.abbreviation == other.abbreviation)
+        else:
+            result = NotImplemented
+        return result
+
+
+class Ability(core.Aggregator,
+              ignore={'name', 'ability_type', 'description', 'progression'}):
+    """Character abilities."""
 
     def __init__(self,
                  name: str,
+                 ability_type: Optional[AbilityType] = None,
                  description: str = '',
                  progression: Optional[Sequence] = None,
                  **features: Any) -> None:
         super().__init__()
 
         self.name = name
+        self.ability_type = ability_type
         self.description = description
         self.progression = progression
 
@@ -452,6 +474,8 @@ class Race(core.Aggregator, ignore={'name'}):
 class Class(core.Aggregator):
     """A character class."""
 
+    # pylint: disable=R
+
     def __init__(self,
                  alignment_restriction: Optional[List[str]],
                  hit_die: Dice,
@@ -479,9 +503,16 @@ class Class(core.Aggregator):
 class Feat:
     """Ability chosen every few levels or granted by a class."""
 
+    # pylint: disable=R
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
 
 class Character(core.Aggregator, ignore={'classes'}):
     """A character of some level."""
+
+    # pylint: disable=R
 
     def __init__(self, race: Race, classes: Dict[Class, int], feats: Sequence[Feat]) -> None:
         super().__init__()

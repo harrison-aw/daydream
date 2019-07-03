@@ -1,3 +1,5 @@
+# pylint: disable=W,C,R
+
 import dnd35.concepts as concepts
 
 
@@ -22,8 +24,7 @@ class TestDice:
 
     def test_repr_executes(self):
         dice = concepts.Dice(3, None, [(6, 6)])
-        repr_ = repr(dice)
-        new_dice = eval(repr_, {'Dice': concepts.Dice})
+        new_dice = eval(repr(dice), {'Dice': concepts.Dice})
         assert dice == new_dice
 
     def test_add_dice_pools(self):
@@ -137,6 +138,13 @@ class TestAbilityScore:
     def test_negative_modifier(self):
         score = concepts.AbilityScore(7)
         assert score.modifier == -2
+
+
+class TestAbilityType:
+    def test_repr_evaluates(self):
+        ability = concepts.AbilityType('Supernatural', 'Su')
+        ability_copy = eval(repr(ability), {'AbilityType': concepts.AbilityType})
+        assert ability == ability_copy
 
 
 class TestSpecial:
