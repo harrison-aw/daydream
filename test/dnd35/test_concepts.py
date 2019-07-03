@@ -56,9 +56,11 @@ class TestModifier:
         assert modifier == 10
 
     def test_handles_conditional(self):
-        modifier = concepts.Modifier('+1 racial bonus on attack rolls against orcs and goblinoids.')
+        modifier = concepts.Modifier('+1 racial bonus on attack rolls '
+                                     'against orcs and goblinoids.')
         assert modifier == 0
-        assert str(modifier) == '+1 racial bonus on attack rolls against orcs and goblinoids.'
+        assert str(modifier) == '+1 racial bonus on attack rolls ' \
+                                'against orcs and goblinoids.'
 
     def test_repr_is_readable(self):
         modifier = concepts.Modifier(unnamed=10)
@@ -75,12 +77,15 @@ class TestModifier:
         assert modifier['wrong'] == 0
 
     def test_adding_bonuses(self):
-        modifier1 = concepts.Modifier('+1 test', '+1 too', unnamed=3, dodge=2, racial=3)
-        modifier2 = concepts.Modifier('+1 test', unnamed=1, dodge=2, racial=2)
+        modifier1 = concepts.Modifier('+1 test', '+1 too',
+                                      unnamed=3, dodge=2, racial=3)
+        modifier2 = concepts.Modifier('+1 test',
+                                      unnamed=1, dodge=2, racial=2)
 
         sum_ = modifier1 + modifier2
 
-        desired = concepts.Modifier('+1 test', '+1 too', unnamed=4, dodge=4, racial=3)
+        desired = concepts.Modifier('+1 test', '+1 too',
+                                    unnamed=4, dodge=4, racial=3)
         assert sum_ == desired
 
     def test_bonus_string(self):
@@ -92,7 +97,8 @@ class TestModifier:
         assert str(modifier) == '+1\n+1 if blind'
 
     def test_iteration(self):
-        modifier = concepts.Modifier('+1 test', '+1 too', unnamed=3, dodge=2, racial=3)
+        modifier = concepts.Modifier('+1 test', '+1 too',
+                                     unnamed=3, dodge=2, racial=3)
         assert set(modifier) == {'unnamed', 'dodge', 'racial'}
 
 
@@ -103,9 +109,9 @@ class TestProgression:
 
     def test_repr_evaluates(self):
         good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
-        repr_ = repr(good_save)
-        save_evaluated = eval(repr_, {'Progression': concepts.Progression})
-        assert good_save == save_evaluated
+        good_save_copy = eval(repr(good_save),
+                              {'Progression': concepts.Progression})
+        assert good_save == good_save_copy
 
 
 class TestSize:
@@ -143,7 +149,8 @@ class TestAbilityScore:
 class TestAbilityType:
     def test_repr_evaluates(self):
         ability = concepts.AbilityType('Supernatural', 'Su')
-        ability_copy = eval(repr(ability), {'AbilityType': concepts.AbilityType})
+        ability_copy = eval(repr(ability),
+                            {'AbilityType': concepts.AbilityType})
         assert ability == ability_copy
 
 
