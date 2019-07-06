@@ -406,6 +406,19 @@ class Ability(core.Aggregator,
             result = prefix + ')'
         return result
 
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, Ability):
+            # pylint: disable-msg=protected-access
+            result = (self.name == other.name
+                      and self.ability_type == other.ability_type
+                      and self.description == other.description
+                      and self._features == other._features
+                      and all(getattr(self, a) == getattr(other, a)
+                              for a in self._features))
+        else:
+            result = NotImplemented
+        return result
+
     def __str__(self) -> str:
         return self.name
 

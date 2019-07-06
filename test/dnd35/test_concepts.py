@@ -177,5 +177,7 @@ class TestAbility:
 
     def test_delete_features(self):
         ability = concepts.Ability('Test', test=10)
+
+        assert ability.test == 10
         del ability.test
-        assert repr(ability) == "Ability('Test', None, '')"
+        assert ability == concepts.Ability('Test')
