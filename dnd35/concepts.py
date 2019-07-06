@@ -124,13 +124,16 @@ class Modifier:
 
     @property
     def is_simple(self) -> bool:
-        """True if instance represents a single named, unconditional modifier."""
+        """True if it has a single named, unconditional modifier."""
         return bool(self.conditional) or len(self.named) != 1
 
     def __repr__(self) -> str:
-        conditional = ', '.join(repr(c) for c in self.conditional)
-        named = ', '.join(f'{name}={val}' for name, val in self.named.items())
-        args = ', '.join(a for a in [conditional, named] if a)
+        conditional = ', '.join(repr(c)
+                                for c in self.conditional)
+        named = ', '.join(f'{name}={val}'
+                          for name, val in self.named.items())
+        args = ', '.join(a
+                         for a in [conditional, named] if a)
         return f'{type(self).__name__}({args})'
 
     def __str__(self) -> str:
@@ -385,14 +388,21 @@ class Ability(core.Aggregator,
 
     def __repr__(self) -> str:
         class_name = type(self).__name__
-        features = ', '.join(f'{name}={getattr(self, name)}' for name in self._features)
+        ability_name = repr(self.name)
+        ability_type = repr(self.ability_type)
+        description = repr(self.description)
+        prefix = f'{class_name}({ability_name}, {ability_type}, {description}'
 
-        prefix = f'{class_name}({self.name}, {self._parameter}, {self.description}'
+        features = ', '.join(f'{name}={repr(getattr(self, name))}'
+                             for name in self._features)
         if features:
             result = prefix + ', ' + features + ')'
         else:
             result = prefix + ')'
         return result
+
+    def __str__(self) -> str:
+        return self.name
 
     def __getitem__(self, item: int) -> Any:
         if self.progression is None:
@@ -474,6 +484,18 @@ class Race(core.Aggregator, ignore={'name'}):
             generic = Modifier()
 
         return generic + getattr(self, name)
+
+
+class ClassFeature:
+    """A sequence type for abilities that change with class levels."""
+
+    # pylint: disable=R
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def __getitem__(self, level) -> Ability:
+        raise NotImplementedError
 
 
 class Class(core.Aggregator):

@@ -170,5 +170,7 @@ class TestAbility:
 
     def test_sneak_attack(self):
         sneak_attack = concepts.Ability(
-            'Sneak attack',
+            'Sneak attack +1d6',
+            damage=concepts.Dice(6, 1)
         )
+        assert str(sneak_attack) == 'Sneak attack +1d6'
