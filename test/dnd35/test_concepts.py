@@ -174,3 +174,8 @@ class TestAbility:
             damage=concepts.Dice(6, 1)
         )
         assert str(sneak_attack) == 'Sneak attack +1d6'
+
+    def test_delete_features(self):
+        ability = concepts.Ability('Test', test=10)
+        del ability.test
+        assert repr(ability) == "Ability('Test', None, '')"

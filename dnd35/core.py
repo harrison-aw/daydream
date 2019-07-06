@@ -67,7 +67,7 @@ class Aggregator:
                 raise AttributeError
         return result
 
-    def __delattr__(self, name: str):
+    def __delattr__(self, name: str) -> None:
         """Remove deleted attributes from tracker."""
         super().__delattr__(name)
         i = super().__getattribute__('_instance_names').index(name)

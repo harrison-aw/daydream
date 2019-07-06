@@ -386,6 +386,11 @@ class Ability(core.Aggregator,
         if not name.startswith('_') and name not in self._ignore:
             self._features.add(name)
 
+    def __delattr__(self, name: str) -> None:
+        if name in self._features:
+            self._features.remove(name)
+        super().__delattr__(name)
+
     def __repr__(self) -> str:
         class_name = type(self).__name__
         ability_name = repr(self.name)
