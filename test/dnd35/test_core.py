@@ -1,6 +1,6 @@
 # pylint: disable=W,C,R
 
-import dnd35.core
+import dnd35.core as core
 
 
 class TestAggregator:
@@ -9,13 +9,13 @@ class TestAggregator:
             def __init__(self, x=1):
                 self.x = x
 
-        class Branch(dnd35.core.Aggregator):
+        class Branch(core.Aggregator):
             def __init__(self, x=3):
                 super().__init__()
                 self.x = x
                 self.leaf = Leaf()
 
-        class Root(dnd35.core.Aggregator):
+        class Root(core.Aggregator):
             def __init__(self, x=2):
                 super().__init__()
                 self._x = x
@@ -28,3 +28,11 @@ class TestAggregator:
 
         instance = Root()
         assert instance.x == 7
+
+
+class TestOrdinals:
+    def test_ordinal_to_integer(self):
+        assert core.ordinal(10) == 'tenth'
+
+    def test_integer_to_ordinal(self):
+        assert core.ordinal('fifth') == 5
