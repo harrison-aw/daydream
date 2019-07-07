@@ -381,11 +381,6 @@ class Ability(core.Aggregator,
         for feature, definition in features.items():
             setattr(self, feature, definition)
 
-    def __setattr__(self, name: str, value: Any) -> None:
-        super().__setattr__(name, value)
-        if not name.startswith('_') and name not in self._ignore:
-            self._features.add(name)
-
     def __delattr__(self, name: str) -> None:
         if name in self._features:
             self._features.remove(name)
@@ -509,14 +504,41 @@ class ClassFeature:
 
     # pylint: disable=R
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str,
+                 description: str,
+                 **progression: Ability) -> None:
         self.name = name
+        self.description = description
 
-    def __getitem__(self, level) -> Ability:
-        raise NotImplementedError
+        self.progression = {core.ordinal(level): ability
+                            for level, ability in progression.items()}
+
+    def __repr__(self) -> str:
+        prefix = f'{type(self).__name__}({repr(self.name)},' \
+            f' {repr(self.description)}'
+        progression = ', '.join(f'{core.ordinal(level)}={repr(ability)}'
+                                for level, ability in self.progression.items())
+        if progression:
+            result = prefix + ', ' + progression + ')'
+        else:
+            result = prefix + ')'
+        return result
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, ClassFeature):
+            result = (self.name == other.name
+                      and self.description == other.description
+                      and self.progression == other.progression)
+        else:
+            result = NotImplemented
+        return result
+
+    def __getitem__(self, level: int) -> Ability:
+        level = max(lvl for lvl in self.progression if lvl <= level)
+        return self.progression[level]
 
 
-class Class(core.Aggregator):
+class Class:
     """A character class."""
 
     # pylint: disable=R
@@ -530,19 +552,46 @@ class Class(core.Aggregator):
                  fort_save: Progression,
                  ref_save: Progression,
                  will_save: Progression,
-                 special: List[List[Any]],
-                 **features: Any):
+                 *features: ClassFeature):
         super().__init__()
-        self._alignment_restriction = alignment_restriction
-        self._hit_die = hit_die
-        self._class_skills = class_skills
-        self._skill_points_per_level = skill_points_per_level
-        self._base_attack_bonus = base_attack_bonus
-        self._fort_save = fort_save
-        self._ref_save = ref_save
-        self._will_save = will_save
-        self._special = special
-        self._features = features
+        self.alignment_restriction = alignment_restriction
+        self.hit_die = hit_die
+        self.class_skills = class_skills
+        self.skill_points_per_level = skill_points_per_level
+        self.base_attack_bonus = base_attack_bonus
+        self.fort_save = fort_save
+        self.ref_save = ref_save
+        self.will_save = will_save
+        self.features = features
+
+
+class ClassLevel(core.Aggregator, ignore={'class_', 'level'}):
+    """Attained level of a particular class."""
+
+    def __init__(self, class_: Class, level: int) -> None:
+        super().__init__()
+        self.class_ = class_
+        self.level = level
+
+    @property
+    def base_attack_bonus(self) -> Modifier:
+        """Base attack bonus for the given level."""
+        return self.class_.base_attack_bonus[self.level]
+
+    @property
+    def fort_save(self) -> Modifier:
+        """Fortitude saving throw bonus for the given level."""
+        return self.class_.fort_save[self.level]
+
+    @property
+    def ref_save(self) -> Modifier:
+        """Reflex saving throw bonus for the given level."""
+        return self.class_.ref_save[self.level]
+
+    @property
+    def will_save(self) -> Modifier:
+        """Will saving throw bonus for the given level."""
+        return self.class_.will_save[self.level]
 
 
 class Feat:

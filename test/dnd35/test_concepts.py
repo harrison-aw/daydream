@@ -181,3 +181,16 @@ class TestAbility:
         assert ability.test == 10
         del ability.test
         assert ability == concepts.Ability('Test')
+
+
+class TestClassFeature:
+    def test_sneak_attack(self):
+        sneak_attack = concepts.ClassFeature(
+            'Sneak attack',
+            '',
+            first=concepts.Ability('Sneak attack +1d6', None, '',
+                                   damage=concepts.Dice(6, 1)),
+            third=concepts.Ability('Sneak attack +2d6', None, '',
+                                   damage=concepts.Dice(6, 2)),
+        )
+        assert str(sneak_attack[4]) == 'Sneak attack +2d6'
