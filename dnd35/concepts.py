@@ -505,7 +505,7 @@ class ClassFeature:
     # pylint: disable=R
 
     def __init__(self, name: str,
-                 description: str,
+                 description: str = '',
                  **progression: Ability) -> None:
         self.name = name
         self.description = description
