@@ -15,7 +15,7 @@ d12 = concepts.Dice(12)
 d20 = concepts.Dice(20)
 
 
-# Progressions
+# Base saving throw progressions
 good_base_save = concepts.Progression(
     'base save',
     2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12,
@@ -23,6 +23,21 @@ good_base_save = concepts.Progression(
 poor_base_save = concepts.Progression(
     'base save',
     0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6,
+)
+
+
+# Base attack bonus progressions
+good_base_attack_bonus = concepts.Progression(
+    'base attack',
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+)
+average_base_attack_bonus = concepts.Progression(
+    'base attack',
+    0, 1, 2, 3, 3, 4, 5, 6, 6, 7, 8, 9, 9, 10, 11, 12, 12, 13, 14, 15,
+)
+poor_base_attack_bonus = concepts.Progression(
+    'base attack',
+    0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,
 )
 
 
