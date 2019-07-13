@@ -1,5 +1,7 @@
 """Implements basic concepts used in defining game entities."""
 
+__all__ = ['Modifier', 'Size', 'AbilityScore', 'Race']
+
 from collections import Counter
 from functools import total_ordering
 from itertools import chain, groupby
@@ -619,6 +621,3 @@ class Character(core.Aggregator, ignore={'classes'}):
     def level(self) -> int:
         """The characters level."""
         return len(self.classes)
-
-
-__all__ = ['Modifier', 'Size', 'AbilityScore', 'Race']
