@@ -1,6 +1,6 @@
 """Definitions from the SRD."""
 
-# pylint: disable-msg=C0103
+# pylint: disable=invalid-name
 
 import dnd35.concepts as concepts
 
@@ -42,15 +42,15 @@ poor_base_attack_bonus = concepts.Progression(
 
 
 # Sizes
-fine = concepts.Size(+8)
-diminutive = concepts.Size(+4)
-tiny = concepts.Size(+2)
-small = concepts.Size(+1)
-medium = concepts.Size(+0)
-large = concepts.Size(-1)
-huge = concepts.Size(-2)
-gargantuan = concepts.Size(-4)
-colossal = concepts.Size(-8)
+fine = concepts.Size('Fine', +8)
+diminutive = concepts.Size('Diminutive', +4)
+tiny = concepts.Size('Tiny', +2)
+small = concepts.Size('Small', +1)
+medium = concepts.Size('Medium', +0)
+large = concepts.Size('Large', -1)
+huge = concepts.Size('Huge', -2)
+gargantuan = concepts.Size('Gargantuan', -4)
+colossal = concepts.Size('Colossal', -8)
 
 
 # Abilities

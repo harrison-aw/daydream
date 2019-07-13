@@ -261,7 +261,8 @@ class Progression:
 class Size:
     """Size of a creature."""
 
-    def __init__(self, modifier: int) -> None:
+    def __init__(self, name: str, modifier: int) -> None:
+        self.name = name
         self.modifier = Modifier(size=modifier)
 
     @property
@@ -286,11 +287,12 @@ class Size:
 
     def __repr__(self) -> str:
         modifier = self.modifier['size']
-        return f'{type(self).__name__}({modifier})'
+        return f'{type(self).__name__}({self.name}, {modifier})'
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Size):
-            result = self.modifier == other.modifier
+            result = (self.name == other.name
+                      and self.modifier == other.modifier)
         else:
             result = NotImplemented
         return result
