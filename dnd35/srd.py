@@ -15,6 +15,17 @@ d12 = concepts.Dice(12)
 d20 = concepts.Dice(20)
 
 
+# Progressions
+good_base_save = concepts.Progression(
+    'base save',
+    2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12,
+)
+poor_base_save = concepts.Progression(
+    'base save',
+    0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6,
+)
+
+
 # Sizes
 fine = concepts.Size(+8)
 diminutive = concepts.Size(+4)
