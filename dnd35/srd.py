@@ -55,16 +55,21 @@ colossal = concepts.Size('Colossal', -8)
 
 # Abilities
 darkvision = concepts.Ability('Darkvision')
+low_light_vision = concepts.Ability('Low-Light Vision')
+
 stonecunning = concepts.Ability(
     'Stonecunning',
-    search=concepts.Modifier('+2 racial bonus to notice unusual '
-                             'stonework')
+    search=concepts.Modifier(
+        '+2 racial bonus to notice unusual stonework'
+    )
 )
 stability = concepts.Ability(
     'Stability',
-    STR=concepts.Modifier('+4 on ability checks to resist being bull '
-                          'rushed or tripped when standing on the ground'))
-low_light_vision = concepts.Ability('Low-Light Vision')
+    STR=concepts.Modifier(
+        '+4 on ability checks to resist being bull rushed or tripped '
+        'when standing on the ground'
+    )
+)
 
 
 # Races
