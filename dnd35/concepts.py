@@ -213,7 +213,9 @@ class Modifier:
 
     def __mul__(self, other: int) -> 'Modifier':
         if self.is_simple:
-            raise AmbiguousOperationError('Multiplication of unspecified or complex modifier is ambiguous')
+            raise AmbiguousOperationError(
+                'Multiplication of unspecified or complex modifier is ambiguous'
+            )
         name, value = self._unique
         return Modifier(**{name: other * value})
 
@@ -221,7 +223,9 @@ class Modifier:
 
     def __neg__(self) -> 'Modifier':
         if self.is_simple:
-            raise AmbiguousOperationError('Negation of unspecified or complex modifier is ambiguous')
+            raise AmbiguousOperationError(
+                'Negation of unspecified or complex modifier is ambiguous'
+            )
         name, value = self._unique
         return Modifier(**{name: -value})
 
