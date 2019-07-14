@@ -116,23 +116,23 @@ class TestProgression:
 
 class TestSize:
     def test_repr_is_evaluable(self):
-        small = concepts.Size(-1)
+        small = concepts.Size('Small', -1)
         assert eval(repr(small), {'Size': concepts.Size}) == small
 
     def test_small_attack_bonus(self):
-        small = concepts.Size(-1)
+        small = concepts.Size('Small', -1)
         assert small.attack_bonus == 1
 
     def test_small_armor_class(self):
-        small = concepts.Size(-1)
+        small = concepts.Size('Small', -1)
         assert small.armor_class == 1
 
     def test_small_grapple(self):
-        small = concepts.Size(-1)
+        small = concepts.Size('Small', -1)
         assert small.grapple == -4
 
     def test_small_hide(self):
-        small = concepts.Size(-1)
+        small = concepts.Size('Small', -1)
         assert small.hide == 4
 
 
