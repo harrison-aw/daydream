@@ -6,9 +6,10 @@ from collections import Counter
 from functools import total_ordering
 from typing import Any, Tuple, List, Optional, Iterable, SupportsInt, Iterator, \
     Set, Sequence, Dict, Union
+from itertools import chain, groupby
 
 import dnd35.core as core
-from itertools import chain, groupby
+
 
 DiceCounts = Tuple[int, Optional[int]]
 AbstractDicePool = Iterable[DiceCounts]
