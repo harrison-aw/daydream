@@ -4,11 +4,11 @@ __all__ = ['Modifier', 'Size', 'AbilityScore', 'Race']
 
 from collections import Counter
 from functools import total_ordering
-from itertools import chain, groupby
 from typing import Any, Tuple, List, Optional, Iterable, SupportsInt, Iterator, \
-    Set, Sequence, Dict
+    Set, Sequence, Dict, Union
 
 import dnd35.core as core
+from itertools import chain, groupby
 
 DiceCounts = Tuple[int, Optional[int]]
 AbstractDicePool = Iterable[DiceCounts]
@@ -163,8 +163,12 @@ class Modifier:
             result = int(self) == other
         return result
 
-    def __lt__(self, other: Any) -> bool:
-        return int(self) < other
+    def __lt__(self, other: Any) -> Union[bool, NotImplemented]:
+        try:
+            result = int(self) < int(other)
+        except TypeError:
+            result = NotImplemented
+        return result
 
     def __int__(self) -> int:
         return sum(bonus for bonus in self.named.values())
@@ -287,7 +291,7 @@ class Size:
 
     def __repr__(self) -> str:
         modifier = self.modifier['size']
-        return f'{type(self).__name__}({self.name}, {modifier})'
+        return f'{type(self).__name__}({repr(self.name)}, {modifier})'
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Size):
@@ -313,13 +317,16 @@ class AbilityScore:
         return f'{type(self).__name__}({self.score})'
 
     def __eq__(self, other: Any) -> bool:
-        try:
+        if isinstance(other, AbilityScore):
             result = self.score == other.score
-        except AttributeError:
-            result = self.score == other
+        else:
+            try:
+                result = self.score == int(other)
+            except TypeError:
+                result = NotImplemented
         return result
 
-    def __add__(self, other: SupportsInt) -> 'AbilityScore':
+    def __add__(self, other: SupportsInt) -> Union['AbilityScore', NotImplemented]:
         try:
             value = int(other)
         except TypeError:
@@ -330,7 +337,7 @@ class AbilityScore:
 
     __radd__ = __add__
 
-    def __iadd__(self, other: SupportsInt) -> 'AbilityScore':
+    def __iadd__(self, other: SupportsInt) -> Union['AbilityScore', NotImplemented]:
         try:
             value = int(other)
         except TypeError:
@@ -496,11 +503,16 @@ class Race(core.Aggregator, ignore={'name'}):
 
     def _save_bonus(self, name: str) -> Modifier:
         try:
-            generic = self.saving_throws
+            specific: Modifier = getattr(self, name)
+        except AttributeError:
+            specific = Modifier()
+
+        try:
+            generic: Modifier = self.saving_throws
         except AttributeError:
             generic = Modifier()
 
-        return generic + getattr(self, name)
+        return generic + specific
 
 
 class ClassFeature:
