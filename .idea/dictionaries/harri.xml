@@ -12,6 +12,7 @@
       <w>goblinoids</w>
       <w>halfling</w>
       <w>ignan</w>
+      <w>mypy</w>
       <w>orcs</w>
       <w>pylint</w>
       <w>pytest</w>
@@ -19,6 +20,7 @@
       <w>stackable</w>
       <w>stonecunning</w>
       <w>subaggregation</w>
+      <w>trapfinding</w>
       <w>undercommon</w>
     </words>
   </dictionary>

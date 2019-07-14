@@ -295,6 +295,8 @@ variable-naming-style=snake_case
 
 [FORMAT]
 
+disable=trailing-whitespace
+
 # Expected format of line ending, e.g. empty (any line ending), LF or CRLF.
 expected-line-ending-format=
 
