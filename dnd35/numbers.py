@@ -24,12 +24,15 @@
 
 __all__ = ['Die', 'Dice', 'BadDiceError']
 
-from typing import Tuple, Optional, Iterable, List, Any, Union
+from typing import Tuple, Optional, Iterable, List, Any, Union, Dict
+from collections import defaultdict
 from itertools import chain, groupby
+from functools import total_ordering
 
 import dnd35.core as core
 
 
+@total_ordering
 class Die:
     """Represents a single die.
 
@@ -82,6 +85,48 @@ class Die:
 
     def __hash__(self) -> int:
         return hash((type(self).__name__, self._side_count))
+
+    def __lt__(self, other: Any) -> Union[bool, 'NotImplemented']:
+        if isinstance(other, Die):
+            result = self._side_count < other._side_count
+        else:
+            result = NotImplemented
+        return result
+
+
+class NewDicePool:
+    """A pool of dice.
+
+    :param die_counts: die strings are used to specify how many sides a
+        given dice has while the value assigned to the dice string
+        represents how many of that kind of die are present, example:
+        DicePool(d6=1, d8=4) creates a pool with 1d6 and 4d8 present.
+    """
+
+    def __init__(self, **die_counts: int) -> None:
+        self._pool: Dict[Die, int] = defaultdict(int)
+        for die_string, count in die_counts.items():
+            die = Die.from_string(die_string)
+            self._pool[die] += count
+
+    def __eq__(self, other: Any) -> Union[bool, 'NotImplemented']:
+        if isinstance(other, NewDicePool):
+            return self._sorted == other._sorted
+        else:
+            result = NotImplemented
+        return result
+
+    def __repr__(self) -> str:
+        pool_string = ', '.join(f'{die}={count}' for die, count in self._sorted)
+        return type(self).__name__ + f'({pool_string})'
+
+    @property
+    def _sorted(self) -> List[Tuple[Die, int]]:
+        """Returns a sorted list of each die and its count in the pool."""
+        result = [(die, count) for die, count in self._pool.items()
+                  if count > 0]
+        result.sort(key=lambda x: x[0])
+        return result
 
 
 DiceCounts = Tuple[int, Optional[int]]

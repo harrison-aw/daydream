@@ -76,6 +76,20 @@ class TestDie:
         assert die.average == 3.5
 
 
+class TestDicePool:
+    """Tests for DicePool."""
+
+    def test_repr_evaluates(self):
+        """Ensure that the repr can evaluates."""
+        dice_pool = numbers.NewDicePool(d6=1, d8=2)
+        assert eval(repr(dice_pool), {'NewDicePool': numbers.NewDicePool}) == dice_pool
+
+    def test_equals_with_zero_counts(self):
+        dice_pool1 = numbers.NewDicePool(d6=1, d8=2, d10=0)
+        dice_pool2 = numbers.NewDicePool(d6=1, d8=2)
+        assert dice_pool1 == dice_pool2
+
+
 class TestDice:
     """Tests for the Dice class."""
 
