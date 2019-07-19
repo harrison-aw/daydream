@@ -23,7 +23,7 @@
 # pylint: disable=W,C,R
 
 import dnd35.concepts as concepts
-import dnd35.numbers as dice
+import dnd35.numbers as numbers
 
 
 class TestModifier:
@@ -147,7 +147,7 @@ class TestAbility:
     def test_sneak_attack(self):
         sneak_attack = concepts.Ability(
             'Sneak attack +1d6',
-            damage=dice.Dice(6, 1)
+            damage=numbers.DicePool(d6=1)
         )
         assert str(sneak_attack) == 'Sneak attack +1d6'
 
@@ -164,9 +164,9 @@ class TestClassFeature:
         sneak_attack = concepts.ClassFeature(
             'Sneak attack',
             first=concepts.Ability('Sneak attack +1d6', None, '',
-                                   damage=dice.Dice(6, 1)),
+                                   damage=numbers.DicePool(d6=1)),
             third=concepts.Ability('Sneak attack +2d6', None, '',
-                                   damage=dice.Dice(6, 2)),
+                                   damage=numbers.DicePool(d6=2)),
         )
         assert str(sneak_attack[4]) == 'Sneak attack +2d6'
 
@@ -176,9 +176,9 @@ class TestClass:
         sneak_attack = concepts.ClassFeature(
             'Sneak attack',
             first=concepts.Ability('Sneak attack +1d6',
-                                   damage=dice.Dice(6, 1)),
+                                   damage=numbers.DicePool(d6=1)),
             third=concepts.Ability('Sneak attack +2d6',
-                                   damage=dice.Dice(6, 2)),
+                                   damage=numbers.DicePool(d6=2)),
         )
         trapfinding = concepts.ClassFeature('Trapfinding', '')
         evasion = concepts.ClassFeature(
@@ -194,7 +194,7 @@ class TestClass:
         good_save = concepts.Progression('save', 2, 3, 3)
         rogue = concepts.Class(
             None,
-            dice.Dice(6),
+            numbers.Die(6),
             [],
             8,
             average_bab,

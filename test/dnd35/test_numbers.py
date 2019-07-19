@@ -81,93 +81,35 @@ class TestDicePool:
 
     def test_repr_evaluates(self):
         """Ensure that the repr can evaluates."""
-        dice_pool = numbers.NewDicePool(d6=1, d8=4)
-        assert (eval(repr(dice_pool), {'NewDicePool': numbers.NewDicePool})
+        dice_pool = numbers.DicePool(d6=1, d8=4)
+        assert (eval(repr(dice_pool), {'DicePool': numbers.DicePool})
                 == dice_pool)
 
     def test_equals_with_zero_counts(self):
         """Ensure that equality ignores dice with zero counts."""
-        dice_pool1 = numbers.NewDicePool(d6=1, d8=4, d10=0)
-        dice_pool2 = numbers.NewDicePool(d6=1, d8=4)
+        dice_pool1 = numbers.DicePool(d6=1, d8=4, d10=0)
+        dice_pool2 = numbers.DicePool(d6=1, d8=4)
         assert dice_pool1 == dice_pool2
 
     def test_average_of_pool(self):
         """Ensure that the average of a dice pool is correct."""
-        dice_pool = numbers.NewDicePool(d6=1, d8=4)
+        dice_pool = numbers.DicePool(d6=1, d8=4)
         assert dice_pool.average == 21.5
 
     def test_add_pools(self):
         """Ensure that two dice pools are added correctly"""
-        dice_pool1 = numbers.NewDicePool(d6=1, d8=4)
-        dice_pool2 = numbers.NewDicePool(d4=2, d6=2)
-        assert dice_pool1 + dice_pool2 == numbers.NewDicePool(d4=2, d6=3, d8=4)
+        dice_pool1 = numbers.DicePool(d6=1, d8=4)
+        dice_pool2 = numbers.DicePool(d4=2, d6=2)
+        assert dice_pool1 + dice_pool2 == numbers.DicePool(d4=2, d6=3, d8=4)
 
     def test_add_pool_and_die(self):
         """Ensure that a single die can be added to a pool."""
-        dice_pool = numbers.NewDicePool(d6=1, d8=4)
+        dice_pool = numbers.DicePool(d6=1, d8=4)
         die = numbers.Die(6)
-        assert dice_pool + die == numbers.NewDicePool(d6=2, d8=4)
+        assert dice_pool + die == numbers.DicePool(d6=2, d8=4)
 
     def test_add_die_and_pool(self):
         """Ensure that a single die can be added to a pool."""
-        dice_pool = numbers.NewDicePool(d6=1, d8=4)
+        dice_pool = numbers.DicePool(d6=1, d8=4)
         die = numbers.Die(6)
-        assert die + dice_pool == numbers.NewDicePool(d6=2, d8=4)
-
-
-class TestDice:
-    """Tests for the Dice class."""
-
-    def test_create_d6(self):
-        """Assert that a dice is represented correctly."""
-        dice = numbers.Dice(6)
-        assert str(dice) == 'd6'
-
-    def test_create_4d8(self):
-        """Create and represent a dice with multiple dice."""
-        dice = numbers.Dice(8, 4)
-        assert str(dice) == '4d8'
-
-    def test_hash(self):
-        """Ensure that dice are hashable."""
-        dice1 = numbers.Dice(8, 4, pool=[(6, 10)])
-        dice2 = numbers.Dice(pool=[(6, 10), (8, 4)])
-        assert dice1 == dice2
-        assert hash(dice1) == hash(dice2)
-
-    def test_create_larger_dice_pool(self):
-        """Ensure that larger dice pools can be created."""
-        dice = numbers.Dice(3, None, [(6, 6), (8, 10)])
-        assert str(dice) == 'd3 + 6d6 + 10d8'
-
-    def test_repr_executes(self):
-        """Ensure that the repr is accurate."""
-        dice = numbers.Dice(3, None, [(6, 6)])
-        new_dice = eval(repr(dice), {'Dice': numbers.Dice})
-        assert dice == new_dice
-
-    def test_add_dice_pools(self):
-        """Verify that addition works as expected."""
-        dice1 = numbers.Dice(3, None, [(6, 6)])
-        dice2 = numbers.Dice(3, None, [(6, 6)])
-        desired = numbers.Dice(pool=[(3, None), (3, None), (6, 12)])
-        assert dice1 + dice2 == desired
-
-    def test_in_place_addition(self):
-        """Verify that in-place addition works as expected."""
-        dice1 = numbers.Dice(3, None, [(6, 6)])
-        dice2 = numbers.Dice(3, None, [(6, 6)])
-        dice1 += dice2
-
-        desired = numbers.Dice(pool=[(3, None), (3, None), (6, 12)])
-        assert dice1 == desired
-
-    def test_easy_average(self):
-        """Ensure that average works correctly."""
-        dice = numbers.Dice(6)
-        assert dice.average == 3.5
-
-    def test_hard_average(self):
-        """Ensure that average works for complicated dice pools."""
-        dice = numbers.Dice(3, None, [(6, 6), (8, 10)])
-        assert dice.average == 68.0
+        assert die + dice_pool == numbers.DicePool(d6=2, d8=4)

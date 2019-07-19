@@ -22,15 +22,13 @@
 
 """Classes and helper function for working with numerical values."""
 
-__all__ = ['Die', 'Dice', 'BadDiceError']
+__all__ = ['Die', 'DicePool']
 
-from typing import Tuple, Optional, Iterable, List, Any, Union, DefaultDict
+from typing import Tuple, List, Any, Union, DefaultDict
 from copy import deepcopy
 from collections import defaultdict
-from itertools import chain, groupby
+from itertools import chain
 from functools import total_ordering
-
-import dnd35.core as core
 
 
 @total_ordering
@@ -96,7 +94,7 @@ class Die:
         return result
 
 
-class NewDicePool:
+class DicePool:
     """A pool of dice.
 
     :param die_counts: die strings are used to specify how many sides a
@@ -117,7 +115,7 @@ class NewDicePool:
             self._pool[die] += count
 
     def __eq__(self, other: Any) -> Union[bool, 'NotImplemented']:
-        if isinstance(other, NewDicePool):
+        if isinstance(other, DicePool):
             # pylint: disable=protected-access
             result = self._sorted == other._sorted
         else:
@@ -128,18 +126,18 @@ class NewDicePool:
         pool_string = ', '.join(f'{die}={count}' for die, count in self._sorted)
         return type(self).__name__ + f'({pool_string})'
 
-    def __add__(self, other: Any) -> Union['NewDicePool', 'NotImplemented']:
-        if isinstance(other, NewDicePool):
+    def __add__(self, other: Any) -> Union['DicePool', 'NotImplemented']:
+        if isinstance(other, DicePool):
             # pylint: disable=protected-access
             new_pool_args: DefaultDict[str, int] = defaultdict(int)
             for die, count in chain(self._pool.items(), other._pool.items()):
                 new_pool_args[str(die)] += count
-            result = NewDicePool(**new_pool_args)
+            result = DicePool(**new_pool_args)
         elif isinstance(other, Die):
             new_pool: DefaultDict[Die, int] = deepcopy(self._pool)
             new_pool[other] += 1
-            result = NewDicePool(**{str(die): count
-                                    for die, count in new_pool.items()})
+            result = DicePool(**{str(die): count
+                                 for die, count in new_pool.items()})
         else:
             result = NotImplemented
         return result
@@ -152,104 +150,4 @@ class NewDicePool:
         result = [(die, count) for die, count in self._pool.items()
                   if count > 0]
         result.sort(key=lambda x: x[0])
-        return result
-
-
-DiceCounts = Tuple[int, Optional[int]]
-AbstractDicePool = Iterable[DiceCounts]
-DicePool = List[DiceCounts]
-
-
-class BadDiceError(core.DayDreamError):
-    """Error for issues with dice value."""
-
-
-class Dice:
-    """Represents a pool of dice."""
-
-    def __init__(self,
-                 side_count: Optional[int] = None,
-                 die_count: Optional[int] = None,
-                 pool: Optional[AbstractDicePool] = None) -> None:
-        if side_count is None:
-            if die_count is None:
-                self.pool: DicePool = []
-            else:
-                raise BadDiceError(
-                    'Cannot create dice with an unspecified number of sides.'
-                )
-        else:
-            self.pool = [(side_count, die_count)]
-
-        if pool is not None:
-            self.pool = self._combine(self.pool, pool)
-
-    @property
-    def average(self) -> float:
-        """Average dice roll."""
-        result = 0.
-        for side_count, dice_count in self.pool:
-            if dice_count is None:
-                dice_count = 1
-            result += dice_count * (side_count + 1) / 2
-        return result
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, Dice):
-            result = set(self.pool) == set(other.pool)
-        else:
-            result = NotImplemented
-        return result
-
-    def __hash__(self) -> int:
-        return hash((type(self).__name__, tuple(self.pool)))
-
-    def __repr__(self) -> str:
-        if len(self.pool) == 1:
-            side_count, dice_count = self.pool[0]
-            if dice_count is None:
-                args = f'{side_count}'
-            else:
-                args = f'{side_count}, {dice_count}'
-        else:
-            args = f'pool={self.pool}'
-
-        return f'{type(self).__name__}({args})'
-
-    def __str__(self) -> str:
-        terms = []
-        for side_count, dice_count in self.pool:
-            if dice_count is None:
-                terms.append(f'd{side_count}')
-            else:
-                terms.append(f'{dice_count}d{side_count}')
-
-        return ' + '.join(terms)
-
-    def __add__(self, other: 'Dice') -> 'Dice':
-        if isinstance(other, Dice):
-            result = Dice(pool=self._combine(self.pool, other.pool))
-        else:
-            result = NotImplemented
-
-        return result
-
-    @staticmethod
-    def _combine(first_pool: AbstractDicePool, second_pool: AbstractDicePool,
-                 _key=lambda c: c[0]) -> DicePool:
-        """Combine two dice pools."""
-        result: DicePool = []
-
-        combinable: DicePool = []
-        for side_count, dice_count in chain(first_pool, second_pool):
-            if dice_count is None:
-                result.append((side_count, dice_count))
-            else:
-                combinable.append((side_count, dice_count))
-
-        result.sort(key=_key)
-        combinable.sort(key=_key)
-
-        result.extend((side_count, sum(c[1] for c in counts))
-                      for side_count, counts in groupby(combinable, key=_key))
         return result

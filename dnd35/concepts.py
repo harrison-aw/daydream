@@ -491,7 +491,7 @@ class Class:
 
     def __init__(self,
                  alignment_restriction: Optional[List[str]],
-                 hit_die: numbers.Dice,
+                 hit_die: numbers.Die,
                  class_skills: List[str],
                  skill_points_per_level: int,
                  base_attack_bonus: Progression,

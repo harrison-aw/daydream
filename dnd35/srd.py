@@ -29,13 +29,13 @@ import dnd35.numbers as numbers
 
 
 # Dice
-d3 = numbers.Dice(3)
-d4 = numbers.Dice(4)
-d6 = numbers.Dice(6)
-d8 = numbers.Dice(8)
-d10 = numbers.Dice(10)
-d12 = numbers.Dice(12)
-d20 = numbers.Dice(20)
+d3 = numbers.Die(3)
+d4 = numbers.Die(4)
+d6 = numbers.Die(6)
+d8 = numbers.Die(8)
+d10 = numbers.Die(10)
+d12 = numbers.Die(12)
+d20 = numbers.Die(20)
 
 
 # Base saving throw progressions
