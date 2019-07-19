@@ -24,7 +24,8 @@
 
 __all__ = ['Die', 'Dice', 'BadDiceError']
 
-from typing import Tuple, Optional, Iterable, List, Any, Union, Dict
+from typing import Tuple, Optional, Iterable, List, Any, Union, DefaultDict
+from copy import deepcopy
 from collections import defaultdict
 from itertools import chain, groupby
 from functools import total_ordering
@@ -104,8 +105,13 @@ class NewDicePool:
         DicePool(d6=1, d8=4) creates a pool with 1d6 and 4d8 present.
     """
 
+    @property
+    def average(self) -> float:
+        """Compute the average value of a roll of all dice in the pool."""
+        return sum(count * die.average for die, count in self._pool.items())
+
     def __init__(self, **die_counts: int) -> None:
-        self._pool: Dict[Die, int] = defaultdict(int)
+        self._pool: DefaultDict[Die, int] = defaultdict(int)
         for die_string, count in die_counts.items():
             die = Die.from_string(die_string)
             self._pool[die] += count
@@ -121,6 +127,24 @@ class NewDicePool:
     def __repr__(self) -> str:
         pool_string = ', '.join(f'{die}={count}' for die, count in self._sorted)
         return type(self).__name__ + f'({pool_string})'
+
+    def __add__(self, other: Any) -> Union['NewDicePool', 'NotImplemented']:
+        if isinstance(other, NewDicePool):
+            # pylint: disable=protected-access
+            new_pool_args: DefaultDict[str, int] = defaultdict(int)
+            for die, count in chain(self._pool.items(), other._pool.items()):
+                new_pool_args[str(die)] += count
+            result = NewDicePool(**new_pool_args)
+        elif isinstance(other, Die):
+            new_pool: DefaultDict[Die, int] = deepcopy(self._pool)
+            new_pool[other] += 1
+            result = NewDicePool(**{str(die): count
+                                    for die, count in new_pool.items()})
+        else:
+            result = NotImplemented
+        return result
+
+    __radd__ = __add__
 
     @property
     def _sorted(self) -> List[Tuple[Die, int]]:

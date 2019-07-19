@@ -81,15 +81,38 @@ class TestDicePool:
 
     def test_repr_evaluates(self):
         """Ensure that the repr can evaluates."""
-        dice_pool = numbers.NewDicePool(d6=1, d8=2)
+        dice_pool = numbers.NewDicePool(d6=1, d8=4)
         assert (eval(repr(dice_pool), {'NewDicePool': numbers.NewDicePool})
                 == dice_pool)
 
     def test_equals_with_zero_counts(self):
         """Ensure that equality ignores dice with zero counts."""
-        dice_pool1 = numbers.NewDicePool(d6=1, d8=2, d10=0)
-        dice_pool2 = numbers.NewDicePool(d6=1, d8=2)
+        dice_pool1 = numbers.NewDicePool(d6=1, d8=4, d10=0)
+        dice_pool2 = numbers.NewDicePool(d6=1, d8=4)
         assert dice_pool1 == dice_pool2
+
+    def test_average_of_pool(self):
+        """Ensure that the average of a dice pool is correct."""
+        dice_pool = numbers.NewDicePool(d6=1, d8=4)
+        assert dice_pool.average == 21.5
+
+    def test_add_pools(self):
+        """Ensure that two dice pools are added correctly"""
+        dice_pool1 = numbers.NewDicePool(d6=1, d8=4)
+        dice_pool2 = numbers.NewDicePool(d4=2, d6=2)
+        assert dice_pool1 + dice_pool2 == numbers.NewDicePool(d4=2, d6=3, d8=4)
+
+    def test_add_pool_and_die(self):
+        """Ensure that a single die can be added to a pool."""
+        dice_pool = numbers.NewDicePool(d6=1, d8=4)
+        die = numbers.Die(6)
+        assert dice_pool + die == numbers.NewDicePool(d6=2, d8=4)
+
+    def test_add_die_and_pool(self):
+        """Ensure that a single die can be added to a pool."""
+        dice_pool = numbers.NewDicePool(d6=1, d8=4)
+        die = numbers.Die(6)
+        assert die + dice_pool == numbers.NewDicePool(d6=2, d8=4)
 
 
 class TestDice:
