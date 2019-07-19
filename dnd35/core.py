@@ -74,10 +74,6 @@ class Aggregator:
         super().__init__()
         self._instance_names = copy(self._instance_names)
 
-    @property
-    def _known_names(self) -> Set[str]:
-        return set(self._ignore | set(self._instance_names))
-
     def __setattr__(self, name: str, value: Any) -> None:
         """Track any attributes that are added to an instance."""
         if not name.startswith('_') and name not in self._known_names:
@@ -119,6 +115,10 @@ class Aggregator:
         super().__delattr__(name)
         i = super().__getattribute__('_instance_names').index(name)
         del super().__getattribute__('_instance_names')[i]
+
+    @property
+    def _known_names(self) -> Set[str]:
+        return set(self._ignore | set(self._instance_names))
 
 
 _ORDINALS = ('zeroth', 'first', 'second', 'third', 'fourth', 'fifth',
