@@ -27,8 +27,33 @@ import dnd35.numbers as numbers
 # pylint: disable=no-self-use, eval-used
 
 
+class TestDie:
+    """Tests for the Die class."""
+
+    def test_repr_evaluates(self):
+        """Ensure that the repr can evaluates."""
+        die = numbers.Die(6)
+        assert eval(repr(die), {'Die': numbers.Die}) == die
+
+    def test_str(self):
+        """Ensure that the string representation is correct."""
+        die = numbers.Die(6)
+        assert str(die) == 'd6'
+
+    def test_hashable(self):
+        """Ensure that the object is hashable."""
+        die1 = numbers.Die(6)
+        die2 = numbers.Die(6)
+        assert die1 == die2 and hash(die1) == hash(die2)
+
+    def test_average(self):
+        """Ensure that the average is correctly computed."""
+        die = numbers.Die(6)
+        assert die.average == 3.5
+
+
 class TestDice:
-    """Tests for the Dice object."""
+    """Tests for the Dice class."""
 
     def test_create_d6(self):
         """Assert that a dice is represented correctly."""

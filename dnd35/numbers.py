@@ -22,10 +22,44 @@
 
 """Classes and helper function for working with numerical values."""
 
-from typing import Tuple, Optional, Iterable, List, Any
+__all__ = ['Die', 'Dice', 'BadDiceError']
+
+from typing import Tuple, Optional, Iterable, List, Any, Union
 from itertools import chain, groupby
 
 import dnd35.core as core
+
+
+class Die:
+    """Represents a single die.
+
+    :param side_count: number of sides on the die
+    """
+
+    @property
+    def average(self) -> float:
+        """Average dice roll."""
+        return (self._side_count + 1) / 2
+
+    def __init__(self, side_count: int) -> None:
+        self._side_count = side_count
+
+    def __repr__(self) -> str:
+        return type(self).__name__ + f'({self._side_count})'
+
+    def __str__(self) -> str:
+        return f'd{self._side_count}'
+
+    def __eq__(self, other: Any) -> Union[bool, 'NotImplemented']:
+        if isinstance(other, Die):
+            # pylint: disable=protected-access
+            result = self._side_count == other._side_count
+        else:
+            result = NotImplemented
+        return result
+
+    def __hash__(self) -> int:
+        return hash((type(self).__name__, self._side_count))
 
 
 DiceCounts = Tuple[int, Optional[int]]
