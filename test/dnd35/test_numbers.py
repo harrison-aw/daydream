@@ -21,6 +21,8 @@
 #  SOFTWARE.
 """Unit testing for numbers module."""
 
+import pytest
+
 import dnd35.numbers as numbers
 
 
@@ -29,11 +31,6 @@ import dnd35.numbers as numbers
 
 class TestDie:
     """Tests for the Die class."""
-
-    def test_from_string(self):
-        """Ensure that die strings are properly built."""
-        die = numbers.Die.from_string('d6')
-        assert die == numbers.Die(6)
 
     def test_repr_evaluates(self):
         """Ensure that the repr can evaluates."""
@@ -44,6 +41,25 @@ class TestDie:
         """Ensure that the string representation is correct."""
         die = numbers.Die(6)
         assert str(die) == 'd6'
+
+    def test_from_string(self):
+        """Ensure that die strings are properly built."""
+        die = numbers.Die.from_string('d6')
+        assert die == numbers.Die(6)
+
+    def test_string_conversion_identity(self):
+        die = numbers.Die(6)
+        die_string = 'd6'
+        assert (numbers.Die.from_string(str(die)) == die
+                and str(numbers.Die.from_string(die_string)) == die_string)
+
+    def test_bad_string_prefix(self):
+        with pytest.raises(ValueError):
+            numbers.Die.from_string('34')
+
+    def test_bad_string_suffix(self):
+        with pytest.raises(ValueError):
+            numbers.Die.from_string('d1.1')
 
     def test_hashable(self):
         """Ensure that the object is hashable."""
