@@ -23,53 +23,7 @@
 # pylint: disable=W,C,R
 
 import dnd35.concepts as concepts
-
-
-class TestDice:
-    def test_create_d6(self):
-        dice = concepts.Dice(6)
-        assert str(dice) == 'd6'
-
-    def test_create_4d8(self):
-        dice = concepts.Dice(8, 4)
-        assert str(dice) == '4d8'
-
-    def test_hash(self):
-        dice1 = concepts.Dice(8, 4, pool=[(6, 10)])
-        dice2 = concepts.Dice(pool=[(6, 10), (8, 4)])
-        assert dice1 == dice2
-        assert hash(dice1) == hash(dice2)
-
-    def test_create_larger_dice_pool(self):
-        dice = concepts.Dice(3, None, [(6, 6), (8, 10)])
-        assert str(dice) == 'd3 + 6d6 + 10d8'
-
-    def test_repr_executes(self):
-        dice = concepts.Dice(3, None, [(6, 6)])
-        new_dice = eval(repr(dice), {'Dice': concepts.Dice})
-        assert dice == new_dice
-
-    def test_add_dice_pools(self):
-        dice1 = concepts.Dice(3, None, [(6, 6)])
-        dice2 = concepts.Dice(3, None, [(6, 6)])
-        desired = concepts.Dice(pool=[(3, None), (3, None), (6, 12)])
-        assert dice1 + dice2 == desired
-
-    def test_in_place_addition(self):
-        dice1 = concepts.Dice(3, None, [(6, 6)])
-        dice2 = concepts.Dice(3, None, [(6, 6)])
-        dice1 += dice2
-
-        desired = concepts.Dice(pool=[(3, None), (3, None), (6, 12)])
-        assert dice1 == desired
-
-    def test_easy_average(self):
-        dice = concepts.Dice(6)
-        assert dice.average == 3.5
-
-    def test_hard_average(self):
-        dice = concepts.Dice(3, None, [(6, 6), (8, 10)])
-        assert dice.average == 68.0
+import dnd35.numbers as dice
 
 
 class TestModifier:
@@ -193,7 +147,7 @@ class TestAbility:
     def test_sneak_attack(self):
         sneak_attack = concepts.Ability(
             'Sneak attack +1d6',
-            damage=concepts.Dice(6, 1)
+            damage=dice.Dice(6, 1)
         )
         assert str(sneak_attack) == 'Sneak attack +1d6'
 
@@ -210,9 +164,9 @@ class TestClassFeature:
         sneak_attack = concepts.ClassFeature(
             'Sneak attack',
             first=concepts.Ability('Sneak attack +1d6', None, '',
-                                   damage=concepts.Dice(6, 1)),
+                                   damage=dice.Dice(6, 1)),
             third=concepts.Ability('Sneak attack +2d6', None, '',
-                                   damage=concepts.Dice(6, 2)),
+                                   damage=dice.Dice(6, 2)),
         )
         assert str(sneak_attack[4]) == 'Sneak attack +2d6'
 
@@ -222,9 +176,9 @@ class TestClass:
         sneak_attack = concepts.ClassFeature(
             'Sneak attack',
             first=concepts.Ability('Sneak attack +1d6',
-                                   damage=concepts.Dice(6, 1)),
+                                   damage=dice.Dice(6, 1)),
             third=concepts.Ability('Sneak attack +2d6',
-                                   damage=concepts.Dice(6, 2)),
+                                   damage=dice.Dice(6, 2)),
         )
         trapfinding = concepts.ClassFeature('Trapfinding', '')
         evasion = concepts.ClassFeature(
@@ -240,7 +194,7 @@ class TestClass:
         good_save = concepts.Progression('save', 2, 3, 3)
         rogue = concepts.Class(
             None,
-            concepts.Dice(6),
+            dice.Dice(6),
             [],
             8,
             average_bab,
