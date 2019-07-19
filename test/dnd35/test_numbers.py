@@ -48,16 +48,19 @@ class TestDie:
         assert die == numbers.Die(6)
 
     def test_string_conversion_identity(self):
+        """Ensure that the strings returned and consumed work the same."""
         die = numbers.Die(6)
         die_string = 'd6'
         assert (numbers.Die.from_string(str(die)) == die
                 and str(numbers.Die.from_string(die_string)) == die_string)
 
     def test_bad_string_prefix(self):
+        """Only accept strings that start with "d"."""
         with pytest.raises(ValueError):
             numbers.Die.from_string('34')
 
     def test_bad_string_suffix(self):
+        """Only accept strings that end with an integer."""
         with pytest.raises(ValueError):
             numbers.Die.from_string('d1.1')
 

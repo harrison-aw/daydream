@@ -266,7 +266,8 @@ class AbilityScore:
 
     __radd__ = __add__
 
-    def __iadd__(self, other: SupportsInt) -> Union['AbilityScore', 'NotImplemented']:
+    def __iadd__(self, other: SupportsInt) -> Union['AbilityScore',
+                                                    'NotImplemented']:
         try:
             value = int(other)
         except TypeError:
@@ -553,7 +554,10 @@ class Character(core.Aggregator, ignore={'classes'}):
 
     # pylint: disable=R
 
-    def __init__(self, race: Race, classes: Dict[Class, int], feats: Sequence[Feat]) -> None:
+    def __init__(self,
+                 race: Race,
+                 classes: Dict[Class, int],
+                 feats: Sequence[Feat]) -> None:
         super().__init__()
 
         self.race = race

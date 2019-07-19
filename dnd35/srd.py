@@ -25,16 +25,17 @@
 # pylint: disable=invalid-name
 
 import dnd35.concepts as concepts
+import dnd35.numbers as numbers
 
 
 # Dice
-d3 = concepts.Dice(3)
-d4 = concepts.Dice(4)
-d6 = concepts.Dice(6)
-d8 = concepts.Dice(8)
-d10 = concepts.Dice(10)
-d12 = concepts.Dice(12)
-d20 = concepts.Dice(20)
+d3 = numbers.Dice(3)
+d4 = numbers.Dice(4)
+d6 = numbers.Dice(6)
+d8 = numbers.Dice(8)
+d10 = numbers.Dice(10)
+d12 = numbers.Dice(12)
+d20 = numbers.Dice(20)
 
 
 # Base saving throw progressions

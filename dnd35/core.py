@@ -67,7 +67,8 @@ class Aggregator:
             ignore = set()
 
         cls._ignore = ignore
-        cls._instance_names = [k for k, v in vars(cls).items() if isinstance(v, property)]
+        cls._instance_names = [k for k, v in vars(cls).items()
+                               if isinstance(v, property)]
 
     def __init__(self) -> None:
         """Initialize attribute name tracker."""
@@ -146,13 +147,13 @@ def _ordinal_to_integer(value: str) -> int:
 
 
 @overload
-def ordinal(value: int) -> str:  # pylint: disable-msg=unused-argument
+def ordinal(value: int) -> str:  # pylint: disable=unused-argument
     """Convert an integer to an ordinal string."""
     ...
 
 
 @overload
-def ordinal(value: str) -> int:  # pylint: disable-msg=function-redefined,unused-argument
+def ordinal(value: str) -> int:  # pylint: disable=unused-argument, function-redefined, line-too-long
     """Convert an ordinal string into the corresponding integer."""
     ...
 

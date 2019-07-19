@@ -104,7 +104,9 @@ class Dice:
             if die_count is None:
                 self.pool: DicePool = []
             else:
-                raise BadDiceError('Cannot create dice with an unspecified number of sides.')
+                raise BadDiceError(
+                    'Cannot create dice with an unspecified number of sides.'
+                )
         else:
             self.pool = [(side_count, die_count)]
 

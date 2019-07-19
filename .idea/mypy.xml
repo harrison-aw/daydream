@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="MypyConfigService">
-    <option name="customMypyPath" value="D:\Repos\daydream3.5\venv\Scripts\mypy.exe" />
     <option name="mypyConfigFilePath" value="mypy.ini" />
     <option name="scanBeforeCheckin" value="true" />
   </component>
