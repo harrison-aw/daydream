@@ -30,6 +30,11 @@ import dnd35.numbers as numbers
 class TestDie:
     """Tests for the Die class."""
 
+    def test_from_string(self):
+        """Ensure that die strings are properly built."""
+        die = numbers.Die.from_string('d6')
+        assert die == numbers.Die(6)
+
     def test_repr_evaluates(self):
         """Ensure that the repr can evaluates."""
         die = numbers.Die(6)

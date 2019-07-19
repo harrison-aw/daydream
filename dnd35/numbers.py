@@ -36,6 +36,28 @@ class Die:
     :param side_count: number of sides on the die
     """
 
+    @classmethod
+    def from_string(cls, die_string: str) -> 'Die':
+        """Construct a die from a string.
+
+        :param die_string: a string beginning with 'd' and ending with
+            an integer
+        """
+        if die_string[0] != 'd':
+            raise ValueError(
+                f"A die string must start with d, got '{die_string}'"
+            )
+
+        try:
+            side_count = int(die_string[1:])
+        except ValueError:
+            raise ValueError(
+                f"Invalid die string, got '{die_string}', expected something "
+                f"like 'd6'"
+            ) from None
+        else:
+            return cls(side_count)
+
     @property
     def average(self) -> float:
         """Average dice roll."""
