@@ -88,6 +88,7 @@ class Die:
 
     def __lt__(self, other: Any) -> Union[bool, 'NotImplemented']:
         if isinstance(other, Die):
+            # pylint: disable=protected-access
             result = self._side_count < other._side_count
         else:
             result = NotImplemented
@@ -111,7 +112,8 @@ class NewDicePool:
 
     def __eq__(self, other: Any) -> Union[bool, 'NotImplemented']:
         if isinstance(other, NewDicePool):
-            return self._sorted == other._sorted
+            # pylint: disable=protected-access
+            result = self._sorted == other._sorted
         else:
             result = NotImplemented
         return result
