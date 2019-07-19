@@ -20,7 +20,7 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-"""Classes and helper function for working with dice."""
+"""Classes and helper function for working with numerical values."""
 
 from typing import Tuple, Optional, Iterable, List, Any
 from itertools import chain, groupby
