@@ -191,6 +191,16 @@ class Modifier:
         """Get the modifier type."""
         return self._type
 
+    @property
+    def is_bonus(self) -> bool:
+        """Determine if the modifier is a bonus."""
+        return self._value >= 0
+
+    @property
+    def is_penalty(self) -> bool:
+        """Determine if the modifier is a penalty."""
+        return self._value <= 0
+
     def __init__(self, value: int, type_: ModifierType = UNTYPED) -> None:
         self._value = value
         self._type = type_
@@ -222,9 +232,9 @@ class Modifier:
             if self._type.stacks:
                 result = Modifier(self._value + other._value, self._type)
             else:
-                if self._value >= 0 and other._value >= 0:
+                if self.is_bonus and other.is_bonus:
                     result = Modifier(max(self._value, other._value), self._type)
-                elif self._value <= 0 and other._value <= 0:
+                elif self.is_penalty and other.is_penalty:
                     result = Modifier(min(self._value, other._value), self._type)
                 else:
                     raise CannotCombineModifiersError(

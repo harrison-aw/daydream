@@ -168,3 +168,16 @@ class TestModifier:
         mod1 = num.Modifier(2)
         mod2 = num.Modifier(7)
         assert mod1 < mod2
+
+    def test_bonus(self):
+        """Ensure that a bonus is properly categorized."""
+        bonus = num.Modifier(4)
+        assert bonus.is_bonus and not bonus.is_penalty
+
+    def test_penalty(self):
+        penalty = num.Modifier(-2)
+        assert penalty.is_penalty and not penalty.is_bonus
+
+    def test_zero_is_bonus_and_penalty(self):
+        zero = num.Modifier(0)
+        assert zero.is_bonus and zero.is_penalty
