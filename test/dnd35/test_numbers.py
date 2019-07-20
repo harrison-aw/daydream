@@ -113,3 +113,13 @@ class TestDicePool:
         dice_pool = numbers.DicePool(d6=1, d8=4)
         die = numbers.Die(6)
         assert die + dice_pool == numbers.DicePool(d6=2, d8=4)
+
+
+class TestModifier:
+    """Tests for the Modifier class."""
+
+    def test_repr_evaluates(self):
+        mod = numbers.Modifier(4)
+        namespace = {'Modifier': numbers.Modifier,
+                     'ModifierType': numbers.ModifierType}
+        assert eval(repr(mod), namespace) == mod

@@ -160,3 +160,27 @@ class ModifierType:
     name: str
     stacks: bool = False
 
+
+UNTYPED = ModifierType('untyped', stacks=True)
+
+
+class Modifier:
+    """A bonus or penalty to a dice roll.
+
+    :param value: amount to add or subtract from a roll
+    :param type_: type of modifier, determines stacking behavior
+    """
+
+    def __init__(self, value: int, type_: ModifierType = UNTYPED) -> None:
+        self._value = value
+        self._type = type_
+
+    def __eq__(self, other: Any) -> Union[bool, 'NotImplemented']:
+        if isinstance(other, Modifier):
+            result = self._type == other._type and self._value == other._value
+        else:
+            result = NotImplemented
+        return result
+
+    def __repr__(self):
+        return type(self).__name__ + f'({self._value}, {self._type})'
