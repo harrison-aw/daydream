@@ -31,6 +31,8 @@ from itertools import chain
 from functools import total_ordering
 from dataclasses import dataclass
 
+import dnd35.core as core
+
 
 @total_ordering
 class Die:
@@ -160,8 +162,19 @@ class ModifierType:
     name: str
     stacks: bool = False
 
+    def __str__(self) -> str:
+        return f'({self.name})'
+
 
 UNTYPED = ModifierType('untyped', stacks=True)
+
+
+class DifferentModifierTypesError(core.DayDreamError):
+    """Error for attempting to add two modifiers with different types."""
+
+
+class CannotCombineModifiersError(core.DayDreamError):
+    """Error raised when attempting to add a bonus and penalty together."""
 
 
 class Modifier:
@@ -184,11 +197,33 @@ class Modifier:
         return result
 
     def __repr__(self) -> str:
-        return type(self).__name__ + f'({self._value}, {self._type})'
+        return type(self).__name__ + f'({self._value}, {repr(self._type)})'
 
     def __str__(self) -> str:
-        if self._value >= 0:
-            result = f'+{self._value}'
+        return f'{self._value:+}'
+
+    def __add__(self, other: Any) -> Union['Modifier', 'NotImplemented']:
+        if isinstance(other, Modifier):
+            # pylint: disable=protected-access
+
+            if self._type != other._type:
+                raise DifferentModifierTypesError(
+                    f'Cannot add modifiers of different types: {self._type} '
+                    f'and {other._type}'
+                )
+
+            if self._type.stacks:
+                result = Modifier(self._value + other._value, self._type)
+            else:
+                if self._value >= 0 and other._value >= 0:
+                    result = Modifier(max(self._value, other._value), self._type)
+                elif self._value <= 0 and other._value <= 0:
+                    result = Modifier(min(self._value, other._value), self._type)
+                else:
+                    raise CannotCombineModifiersError(
+                        f'Combining a bonus and a penalty loses information: '
+                        f'{self._value:+} and {other._value:+}'
+                    )
         else:
-            result = f'{self._value}'
+            result = NotImplemented
         return result

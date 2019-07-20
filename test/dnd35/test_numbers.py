@@ -130,3 +130,35 @@ class TestModifier:
         mod_positive = num.Modifier(0)
         mod_negative = num.Modifier(-2)
         assert (str(mod_positive), str(mod_negative)) == ('+0', '-2')
+
+    def test_add_stackable(self):
+        """Ensure that stackable modifiers are combined."""
+        mod1 = num.Modifier(-2)
+        mod2 = num.Modifier(3)
+        assert mod1 + mod2 == num.Modifier(1)
+
+    def test_add_unstackable_bonuses(self):
+        """Ensure that unstackable modifiers only have the best bonus apply."""
+        mod1 = num.Modifier(1, num.ModifierType('armor'))
+        mod2 = num.Modifier(3, num.ModifierType('armor'))
+        assert mod1 + mod2 == num.Modifier(3, num.ModifierType('armor'))
+
+    def test_add_unstackable_penalties(self):
+        """Ensure that unstackable modifiers only have the worst penalty apply."""
+        mod1 = num.Modifier(-1, num.ModifierType('armor'))
+        mod2 = num.Modifier(-3, num.ModifierType('armor'))
+        assert mod1 + mod2 == num.Modifier(-3, num.ModifierType('armor'))
+
+    def test_add_different_types(self):
+        """Ensure that modifiers of different types are not added."""
+        mod1 = num.Modifier(1)
+        mod2 = num.Modifier(3, num.ModifierType('armor'))
+        with pytest.raises(num.DifferentModifierTypesError):
+            mod1 + mod2  # pylint: disable=pointless-statement
+
+    def test_add_bonus_and_penalty(self):
+        """Ensure that an unstackable bonus and penalty are not combined."""
+        mod1 = num.Modifier(-2, num.ModifierType('armor'))
+        mod2 = num.Modifier(3, num.ModifierType('armor'))
+        with pytest.raises(num.CannotCombineModifiersError):
+            mod1 + mod2  # pylint: disable=pointless-statement
