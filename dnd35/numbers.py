@@ -159,6 +159,7 @@ class DicePool:
 @dataclass(frozen=True)
 class ModifierType:
     """Type of a bonus or penalty and its stacking behavior."""
+
     name: str
     stacks: bool = False
 
@@ -178,68 +179,47 @@ class CannotCombineModifiersError(core.DayDreamError):
 
 
 @total_ordering
+@dataclass(frozen=True)
 class Modifier:
-    """A bonus or penalty to a dice roll or other value.
+    """A bonus or penalty to a dice roll or other value."""
 
-    :param value: amount to add or subtract from a dice roll or other
-        value
-    :param type_: type of modifier, determines stacking behavior
-    """
-
-    @property
-    def type(self) -> ModifierType:
-        """Get the modifier type."""
-        return self._type
+    value: int = 0
+    type: ModifierType = UNTYPED
 
     @property
     def is_bonus(self) -> bool:
         """Determine if the modifier is a bonus."""
-        return self._value >= 0
+        return self.value >= 0
 
     @property
     def is_penalty(self) -> bool:
         """Determine if the modifier is a penalty."""
-        return self._value <= 0
-
-    def __init__(self, value: int = 0, type_: ModifierType = UNTYPED) -> None:
-        self._value = value
-        self._type = type_
-
-    def __eq__(self, other: Any) -> Union[bool, 'NotImplemented']:
-        if isinstance(other, Modifier):
-            # pylint: disable=protected-access
-            result = self._type == other._type and self._value == other._value
-        else:
-            result = NotImplemented
-        return result
-
-    def __repr__(self) -> str:
-        return type(self).__name__ + f'({self._value}, {repr(self._type)})'
+        return self.value <= 0
 
     def __str__(self) -> str:
-        return f'{self._value:+}'
+        return f'{self.value:+}'
 
     def __add__(self, other: Any) -> Union['Modifier', 'NotImplemented']:
         if isinstance(other, Modifier):
             # pylint: disable=protected-access
 
-            if self._type != other._type:
+            if self.type != other.type:
                 raise DifferentModifierTypesError(
-                    f'Cannot add modifiers of different types: {self._type} '
-                    f'and {other._type}'
+                    f'Cannot add modifiers of different types: {self.type} '
+                    f'and {other.type}'
                 )
 
-            if self._type.stacks:
-                result = Modifier(self._value + other._value, self._type)
+            if self.type.stacks:
+                result = Modifier(self.value + other.value, self.type)
             else:
                 if self.is_bonus and other.is_bonus:
-                    result = Modifier(max(self._value, other._value), self._type)
+                    result = Modifier(max(self.value, other.value), self.type)
                 elif self.is_penalty and other.is_penalty:
-                    result = Modifier(min(self._value, other._value), self._type)
+                    result = Modifier(min(self.value, other.value), self.type)
                 else:
                     raise CannotCombineModifiersError(
                         f'Combining a bonus and a penalty loses information: '
-                        f'{self._value:+} and {other._value:+}'
+                        f'{self.value:+} and {other.value:+}'
                     )
         else:
             result = NotImplemented
@@ -248,15 +228,15 @@ class Modifier:
     def __lt__(self, other: Any) -> Union[bool, 'NotImplemented']:
         if isinstance(other, Modifier):
             # pylint: disable=protected-access
-            if self._type != other._type:
+            if self.type != other.type:
                 raise DifferentModifierTypesError(
                     f'Cannot compare modifiers of different types: '
-                    f'{self._type} and {other._type}'
+                    f'{self.type} and {other.type}'
                 )
 
-            result = self._value < other._value
+            result = self.value < other.value
         elif isinstance(other, int):
-            result = self._value < other
+            result = self.value < other
         else:
             result = NotImplemented
         return result
@@ -264,6 +244,11 @@ class Modifier:
 
 class ModifierTotal:
     """A sum of modifiers."""
+
+    @property
+    def value(self) -> int:
+        """Get the numerical value of the total."""
+        return sum(mod.value for mod in self._modifiers.values())
 
     def __init__(self, *modifiers: Modifier):
         self._modifiers: Dict[Tuple[ModifierType, bool], Modifier] = {}
