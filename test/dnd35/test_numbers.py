@@ -33,7 +33,7 @@ class TestDie:
     """Tests for the Die class."""
 
     def test_repr_evaluates(self):
-        """Ensure that the repr can evaluates."""
+        """Ensure that the repr can evaluate."""
         die = num.Die(6)
         assert eval(repr(die), {'Die': num.Die}) == die
 
@@ -80,7 +80,7 @@ class TestDicePool:
     """Tests for DicePool."""
 
     def test_repr_evaluates(self):
-        """Ensure that the repr can evaluates."""
+        """Ensure that the repr can evaluate."""
         dice_pool = num.DicePool(d6=1, d8=4)
         assert (eval(repr(dice_pool), {'DicePool': num.DicePool})
                 == dice_pool)
