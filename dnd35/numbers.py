@@ -177,10 +177,18 @@ class Modifier:
 
     def __eq__(self, other: Any) -> Union[bool, 'NotImplemented']:
         if isinstance(other, Modifier):
+            # pylint: disable=protected-access
             result = self._type == other._type and self._value == other._value
         else:
             result = NotImplemented
         return result
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return type(self).__name__ + f'({self._value}, {self._type})'
+
+    def __str__(self) -> str:
+        if self._value >= 0:
+            result = f'+{self._value}'
+        else:
+            result = f'{self._value}'
+        return result
