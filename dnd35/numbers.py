@@ -177,12 +177,19 @@ class CannotCombineModifiersError(core.DayDreamError):
     """Error raised when attempting to add a bonus and penalty together."""
 
 
+@total_ordering
 class Modifier:
-    """A bonus or penalty to a dice roll.
+    """A bonus or penalty to a dice roll or other value.
 
-    :param value: amount to add or subtract from a roll
+    :param value: amount to add or subtract from a dice roll or other
+        value
     :param type_: type of modifier, determines stacking behavior
     """
+
+    @property
+    def type(self) -> ModifierType:
+        """Get the modifier type."""
+        return self._type
 
     def __init__(self, value: int, type_: ModifierType = UNTYPED) -> None:
         self._value = value
@@ -224,6 +231,22 @@ class Modifier:
                         f'Combining a bonus and a penalty loses information: '
                         f'{self._value:+} and {other._value:+}'
                     )
+        else:
+            result = NotImplemented
+        return result
+
+    def __lt__(self, other: Any) -> Union[bool, 'NotImplemented']:
+        if isinstance(other, Modifier):
+            # pylint: disable=protected-access
+            if self._type != other._type:
+                raise DifferentModifierTypesError(
+                    f'Cannot compare modifiers of different types: '
+                    f'{self._type} and {other._type}'
+                )
+
+            result = self._value < other._value
+        elif isinstance(other, int):
+            result = self._value < other
         else:
             result = NotImplemented
         return result

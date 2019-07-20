@@ -162,3 +162,9 @@ class TestModifier:
         mod2 = num.Modifier(3, num.ModifierType('armor'))
         with pytest.raises(num.CannotCombineModifiersError):
             mod1 + mod2  # pylint: disable=pointless-statement
+
+    def test_less_than(self):
+        """Ensure that less than works as expected."""
+        mod1 = num.Modifier(2)
+        mod2 = num.Modifier(7)
+        assert mod1 < mod2
