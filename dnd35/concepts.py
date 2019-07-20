@@ -255,7 +255,8 @@ class AbilityScore:
                 result = NotImplemented
         return result
 
-    def __add__(self, other: SupportsInt) -> Union['AbilityScore', 'NotImplemented']:
+    def __add__(self, other: SupportsInt) -> Union['AbilityScore',
+                                                   'NotImplemented']:
         try:
             value = int(other)
         except TypeError:
@@ -286,7 +287,8 @@ class AbilityType:
         self.abbreviation = abbreviation
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__}({repr(self.name)}, {repr(self.abbreviation)})"
+        return (type(self).__name__
+                + f'({repr(self.name)}, {repr(self.abbreviation)})')
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, AbilityType):

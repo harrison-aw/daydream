@@ -24,7 +24,7 @@
 
 __all__ = ['Die', 'DicePool']
 
-from typing import Tuple, List, Any, Union, DefaultDict, Dict
+from typing import Tuple, List, Any, Union, DefaultDict, Dict, Optional
 from copy import deepcopy
 from collections import defaultdict
 from itertools import chain
@@ -164,27 +164,56 @@ class ModifierType:
     stacks: bool = False
 
     def __str__(self) -> str:
-        return f'({self.name})'
+        return f'{self.name}'
 
 
 UNTYPED = ModifierType('untyped', stacks=True)
 
 
-class DifferentModifierTypesError(core.DayDreamError):
-    """Error for attempting to add two modifiers with different types."""
+class ModifierCombinationError(core.DayDreamError):
+    """Error raised when combining modifiers cannot be accomplished."""
 
 
-class CannotCombineModifiersError(core.DayDreamError):
-    """Error raised when attempting to add a bonus and penalty together."""
+class DifferentModifierTypesError(ModifierCombinationError):
+    """Error for attempting to add two modifiers with different types.
+
+    Modifiers only track a single type and, therefore, cannot support
+    addition between different types.
+    """
+
+
+class BonusAndPenaltyCombinationError(ModifierCombinationError):
+    """Error raised when attempting to add an unstackable bonus and penalty.
+
+    This situation can cause a loss of information. The best bonus and
+    the worst penalty should both apply.
+    """
+
+
+class DifferentConditionsError(ModifierCombinationError):
+    """Error raised when attempting to add modifiers with different conditions.
+
+    Modifiers only track a single numerical bonus and cannot, therefore,
+    handle multiple conditions that would necessitate multiple different.
+    values.
+    """
 
 
 @total_ordering
 @dataclass(frozen=True)
 class Modifier:
-    """A bonus or penalty to a dice roll or other value."""
+    # noinspection PyUnresolvedReferences
+    """A bonus or penalty to a dice roll or other value.
+
+    :param value: the numerical value of the modifier
+    :param type: the type of modifier, used to determine stacking rules
+    :param condition: optional, a limited situation to which the
+        modifier applies
+    """
 
     value: int = 0
     type: ModifierType = UNTYPED
+    condition: Optional[core.Condition] = None
 
     @property
     def is_bonus(self) -> bool:
@@ -197,7 +226,20 @@ class Modifier:
         return self.value <= 0
 
     def __str__(self) -> str:
-        return f'{self.value:+}'
+        type_string = str(self.type)
+        if (not type_string.endswith('bonus')
+                or not type_string.endswith('penalty')):
+            if self.value >= 0:
+                type_string += ' bonus'
+            else:
+                type_string += ' penalty'
+
+        if self.condition is not None:
+            condition_string = ' ' + str(self.condition)
+        else:
+            condition_string = ''
+
+        return f'{self.value:+} {type_string}{condition_string}'
 
     def __add__(self, other: Any) -> Union['Modifier', 'NotImplemented']:
         if isinstance(other, Modifier):
@@ -217,7 +259,7 @@ class Modifier:
                 elif self.is_penalty and other.is_penalty:
                     result = Modifier(min(self.value, other.value), self.type)
                 else:
-                    raise CannotCombineModifiersError(
+                    raise BonusAndPenaltyCombinationError(
                         f'Combining a bonus and a penalty loses information: '
                         f'{self.value:+} and {other.value:+}'
                     )
@@ -242,18 +284,32 @@ class Modifier:
         return result
 
 
+_ModifierKey = Tuple[ModifierType, bool, Optional[core.Condition]]
+
+
 class ModifierTotal:
-    """A sum of modifiers."""
+    """A sum of modifiers.
+
+    :param modifiers: a collection of modifiers
+    """
+
+    def value(self, *conditions_met: core.Condition) -> int:
+        """Get the numerical value of the total."""
+        return sum(mod.value for mod in self._modifiers.values()
+                   if (mod.condition is None
+                       or mod.condition in conditions_met))
 
     @property
-    def value(self) -> int:
-        """Get the numerical value of the total."""
-        return sum(mod.value for mod in self._modifiers.values())
+    def conditions(self) -> List[core.Condition]:
+        """Get all of the conditions present in modifiers."""
+        return [key[2] for key in self._modifiers if key[2] is not None]
 
     def __init__(self, *modifiers: Modifier):
-        self._modifiers: Dict[Tuple[ModifierType, bool], Modifier] = {}
+        self._modifiers: Dict[_ModifierKey, Modifier] = {}
         for mod in modifiers:
-            key = (mod.type, mod.type.stacks or mod.is_bonus)
+            key = (mod.type,
+                   mod.type.stacks or mod.is_bonus,
+                   mod.condition)
             if key in self._modifiers:
                 self._modifiers[key] += mod
             else:

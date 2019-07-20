@@ -23,6 +23,7 @@
 
 import pytest
 
+import dnd35.core as core
 import dnd35.numbers as num
 
 
@@ -129,7 +130,17 @@ class TestModifier:
         """Ensure that the string representation is as expected."""
         mod_positive = num.Modifier(0)
         mod_negative = num.Modifier(-2)
-        assert (str(mod_positive), str(mod_negative)) == ('+0', '-2')
+        assert ((str(mod_positive), str(mod_negative))
+                == ('+0 untyped bonus', '-2 untyped penalty'))
+
+    def test_str_with_conditional(self):
+        """Ensure that a conditional modifier is represented correctly."""
+        mod = num.Modifier(
+            value=2,
+            condition=core.Condition('to learn the spells of her chosen school')
+        )
+        assert (str(mod)
+                == '+2 untyped bonus to learn the spells of her chosen school')
 
     def test_add_stackable(self):
         """Ensure that stackable modifiers are combined."""
@@ -160,7 +171,7 @@ class TestModifier:
         """Ensure that an unstackable bonus and penalty are not combined."""
         mod1 = num.Modifier(-2, num.ModifierType('armor'))
         mod2 = num.Modifier(3, num.ModifierType('armor'))
-        with pytest.raises(num.CannotCombineModifiersError):
+        with pytest.raises(num.ModifierCombinationError):
             mod1 + mod2  # pylint: disable=pointless-statement
 
     def test_less_than(self):
@@ -195,15 +206,30 @@ class TestModifierTotal:
 
     def test_repr_evaluates(self):
         """Ensure that the repr can be used to recreate an object"""
-        total = num.ModifierTotal(num.Modifier(5),
-                                  num.Modifier(2, num.ModifierType('armor')))
+        static_mod = num.Modifier(3, num.ModifierType('ability'))
+        conditional_mod = num.Modifier(
+            value=2,
+            condition=core.Condition('to learn the spells of her chosen school')
+        )
+        total = num.ModifierTotal(static_mod, conditional_mod)
         namespace = {'ModifierTotal': num.ModifierTotal,
                      'Modifier': num.Modifier,
-                     'ModifierType': num.ModifierType}
+                     'ModifierType': num.ModifierType,
+                     'Condition': core.Condition}
         assert eval(repr(total), namespace) == total
 
-    def test_value_of_total(self):
+    def test_value_of_total_with_static_modifiers(self):
         """Ensure that the value of the total is correct."""
         total = num.ModifierTotal(num.Modifier(5),
                                   num.Modifier(2, num.ModifierType('armor')))
-        assert total.value == 7
+        assert total.value() == 7
+
+    def test_value_of_total_with_conditional_modifiers(self):
+        """Ensure that the value of the total is correct."""
+        static_mod = num.Modifier(3, num.ModifierType('ability'))
+        conditional_mod = num.Modifier(
+            value=2,
+            condition=core.Condition('to learn the spells of her chosen school')
+        )
+        total = num.ModifierTotal(static_mod, conditional_mod)
+        assert total.value(*total.conditions) == 5

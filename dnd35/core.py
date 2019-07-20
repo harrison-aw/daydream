@@ -50,10 +50,28 @@ from copy import copy
 from functools import reduce
 from operator import add
 from typing import Any, AbstractSet, Set, Optional, overload
+from dataclasses import dataclass
 
 
 class DayDreamError(Exception):
     """Error for errors raised by module."""
+
+
+@dataclass(frozen=True)
+class Condition:
+    """A specific situation to which some kind of bonus applies.
+
+    For example, in the SRD "[a specialist wizard] gains a +2 bonus on
+    Spellcraft checks to learn the spells of her chosen school." The
+    condition text here would be "to learn the spells of her chosen
+    school" which gives the limited conditions in which the bonus
+    applies.
+    """
+
+    text: str
+
+    def __str__(self) -> str:
+        return self.text
 
 
 class Aggregator:
