@@ -24,7 +24,7 @@
 
 __all__ = ['Die', 'DicePool']
 
-from typing import Tuple, List, Any, Union, DefaultDict
+from typing import Tuple, List, Any, Union, DefaultDict, Dict
 from copy import deepcopy
 from collections import defaultdict
 from itertools import chain
@@ -201,7 +201,7 @@ class Modifier:
         """Determine if the modifier is a penalty."""
         return self._value <= 0
 
-    def __init__(self, value: int, type_: ModifierType = UNTYPED) -> None:
+    def __init__(self, value: int = 0, type_: ModifierType = UNTYPED) -> None:
         self._value = value
         self._type = type_
 
@@ -257,6 +257,31 @@ class Modifier:
             result = self._value < other._value
         elif isinstance(other, int):
             result = self._value < other
+        else:
+            result = NotImplemented
+        return result
+
+
+class ModifierTotal:
+    """A sum of modifiers."""
+
+    def __init__(self, *modifiers: Modifier):
+        self._modifiers: Dict[Tuple[ModifierType, bool], Modifier] = {}
+        for mod in modifiers:
+            key = (mod.type, mod.type.stacks or mod.is_bonus)
+            if key in self._modifiers:
+                self._modifiers[key] += mod
+            else:
+                self._modifiers[key] = mod
+
+    def __repr__(self) -> str:
+        args = ', '.join(repr(mod) for mod in self._modifiers.values())
+        return type(self).__name__ + f'({args})'
+
+    def __eq__(self, other: Any) -> Union[bool, 'NotImplemented']:
+        if isinstance(other, ModifierTotal):
+            # pylint: disable=protected-access
+            result = self._modifiers == other._modifiers
         else:
             result = NotImplemented
         return result

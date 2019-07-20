@@ -175,9 +175,29 @@ class TestModifier:
         assert bonus.is_bonus and not bonus.is_penalty
 
     def test_penalty(self):
+        """Ensure that a penalty is properly categorized."""
         penalty = num.Modifier(-2)
         assert penalty.is_penalty and not penalty.is_bonus
 
     def test_zero_is_bonus_and_penalty(self):
+        """Ensure that zero is both a bonus and a penalty."""
         zero = num.Modifier(0)
         assert zero.is_bonus and zero.is_penalty
+
+    def test_null_modifier(self):
+        """Ensure that we can create a base modifier."""
+        zero = num.Modifier()
+        assert zero == num.Modifier(0)
+
+
+class TestModifierTotal:  # pylint: disable=too-few-public-methods
+    """Tests for the ModifierTotal class."""
+
+    def test_repr_evaluates(self):
+        """Ensure that the repr can be used to recreate an object"""
+        total = num.ModifierTotal(num.Modifier(5),
+                                  num.Modifier(2, num.ModifierType('armor')))
+        namespace = {'ModifierTotal': num.ModifierTotal,
+                     'Modifier': num.Modifier,
+                     'ModifierType': num.ModifierType}
+        assert eval(repr(total), namespace) == total
