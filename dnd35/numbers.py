@@ -29,6 +29,7 @@ from copy import deepcopy
 from collections import defaultdict
 from itertools import chain
 from functools import total_ordering
+from dataclasses import dataclass
 
 
 @total_ordering
@@ -151,3 +152,11 @@ class DicePool:
                   if count > 0]
         result.sort(key=lambda x: x[0])
         return result
+
+
+@dataclass(frozen=True)
+class ModifierType:
+    """Type of a bonus or penalty and its stacking behavior."""
+    name: str
+    stacks: bool = False
+
