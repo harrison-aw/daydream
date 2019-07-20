@@ -190,7 +190,7 @@ class TestModifier:
         assert zero == num.Modifier(0)
 
 
-class TestModifierTotal:  # pylint: disable=too-few-public-methods
+class TestModifierTotal:
     """Tests for the ModifierTotal class."""
 
     def test_repr_evaluates(self):
@@ -203,6 +203,7 @@ class TestModifierTotal:  # pylint: disable=too-few-public-methods
         assert eval(repr(total), namespace) == total
 
     def test_value_of_total(self):
+        """Ensure that the value of the total is correct."""
         total = num.ModifierTotal(num.Modifier(5),
                                   num.Modifier(2, num.ModifierType('armor')))
         assert total.value == 7
