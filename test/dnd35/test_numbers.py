@@ -181,6 +181,11 @@ class TestModifier:
         with pytest.raises(num.ModifierCombinationError):
             mod1 + mod2  # pylint: disable=pointless-statement
 
+    def test_modifier_times_scalar(self):
+        """Ensure that multiplying a modifier by a scalar works as expected."""
+        modifier = num.Modifier(2)
+        assert -4 * modifier == num.Modifier(-8)
+
     def test_less_than(self):
         """Ensure that less than works as expected."""
         mod1 = num.Modifier(2)

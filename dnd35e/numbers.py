@@ -317,6 +317,15 @@ class Modifier:
             result = NotImplemented
         return result
 
+    def __mul__(self, other: Any) -> Union['Modifier', 'NotImplemented']:
+        if isinstance(other, int):
+            result = type(self)(self.value * other, self.type, self.condition)
+        else:
+            result = NotImplemented
+        return result
+
+    __rmul__ = __mul__
+
     def __lt__(self, other: Any) -> Union[bool, 'NotImplemented']:
         if isinstance(other, Modifier):
             # pylint: disable=protected-access
