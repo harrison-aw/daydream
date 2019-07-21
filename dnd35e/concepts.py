@@ -33,23 +33,31 @@ import dnd35e.numbers as num
 
 
 class Progression:
-    """A progression of modifiers."""
+    """A progression of modifiers.
+
+    :param modifier_name: name of modifier in progression, defines
+        modifier type
+    :param values: the values of the modifiers in the the progression
+    """
 
     def __init__(self, modifier_name: str, *values: int) -> None:
-        self._modifier_type = num.ModifierType(modifier_name)
-        self._modifiers = [num.Modifier(v, self._modifier_type) for v in values]
+        modifier_type = num.ModifierType(modifier_name)
+        self._modifiers = [num.Modifier(v, modifier_type)
+                           for v in values]
 
     def __repr__(self) -> str:
         values = ', '.join(str(int(m)) for m in self._modifiers)
         if values:
-            suffix = f', {values})'
+            modifier_name = repr(self._modifiers[0].type.name)
+            values = ', ' + values
         else:
-            suffix = ')'
-        return f"{type(self).__name__}('{self._modifier_type.name}'" + suffix
+            modifier_name = ''
+        return type(self).__name__ + f"({modifier_name}{values})"
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Progression):
-            result = tuple(self) == tuple(other)
+            # pylint: disable=protected-access
+            result = self._modifiers == other._modifiers
         else:
             result = NotImplemented
         return result

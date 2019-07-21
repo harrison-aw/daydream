@@ -34,9 +34,8 @@ class TestProgression:
 
     def test_repr_evaluates(self):
         good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
-        good_save_copy = eval(repr(good_save),
-                              {'Progression': concepts.Progression})
-        assert good_save == good_save_copy
+        assert (eval(repr(good_save), {'Progression': concepts.Progression})
+                == good_save)
 
 
 class TestSize:
