@@ -22,7 +22,7 @@
 
 # pylint: disable=W,C,R
 
-import dnd35.core as core
+import dnd35e.core as core
 
 
 class TestAggregator:

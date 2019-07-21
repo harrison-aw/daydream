@@ -32,7 +32,7 @@ from itertools import chain
 from functools import total_ordering
 from dataclasses import dataclass
 
-import dnd35.core as core
+import dnd35e.core as core
 
 
 _ORDINALS = ('zeroth', 'first', 'second', 'third', 'fourth', 'fifth',

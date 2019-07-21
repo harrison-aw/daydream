@@ -23,8 +23,8 @@
 
 import pytest
 
-import dnd35.core as core
-import dnd35.numbers as num
+import dnd35e.core as core
+import dnd35e.numbers as num
 
 
 # pylint: disable=no-self-use, eval-used

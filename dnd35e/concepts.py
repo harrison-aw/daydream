@@ -29,8 +29,8 @@ from functools import total_ordering
 from typing import Any, Tuple, List, Optional, Iterable, SupportsInt, Iterator, \
     Set, Sequence, Dict, Union
 
-import dnd35.core as core
-import dnd35.numbers as num
+import dnd35e.core as core
+import dnd35e.numbers as num
 
 
 class AmbiguousOperationError(core.DayDreamError):

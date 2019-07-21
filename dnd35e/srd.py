@@ -24,8 +24,8 @@
 
 # pylint: disable=invalid-name
 
-import dnd35.concepts as concepts
-import dnd35.numbers as numbers
+import dnd35e.concepts as concepts
+import dnd35e.numbers as numbers
 
 
 # Dice
