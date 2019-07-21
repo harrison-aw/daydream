@@ -22,157 +22,30 @@
 
 """Implements basic concepts used in defining game entities."""
 
-__all__ = ['Modifier', 'Size', 'AbilityScore', 'Race']
+__all__ = ['Size', 'AbilityScore', 'Race']
 
 from collections import Counter
-from functools import total_ordering
-from typing import Any, Tuple, List, Optional, Iterable, SupportsInt, Iterator, \
+from typing import Any, List, Optional, Iterable, SupportsInt, Iterator, \
     Set, Sequence, Dict, Union
 
 import dnd35e.core as core
 import dnd35e.numbers as num
 
 
-class AmbiguousOperationError(core.DayDreamError):
-    """Error for issues with ambiguous operations."""
-
-
-@total_ordering
-class Modifier:
-    """A collection of modifiers to a particular value."""
-
-    stackable = {'unnamed', 'dodge'}
-
-    def __init__(self, *conditional: str, **named: int) -> None:
-        super().__init__()
-
-        self.conditional = set(conditional)
-        self.named = named
-
-    @property
-    def is_simple(self) -> bool:
-        """True if it has a single named, unconditional modifier."""
-        return bool(self.conditional) or len(self.named) != 1
-
-    def __repr__(self) -> str:
-        conditional = ', '.join(repr(c)
-                                for c in self.conditional)
-        named = ', '.join(f'{name}={val}'
-                          for name, val in self.named.items())
-        args = ', '.join(a
-                         for a in [conditional, named] if a)
-        return f'{type(self).__name__}({args})'
-
-    def __str__(self) -> str:
-        conditional = '\n'.join(self.conditional)
-        named = sum(v for v in self.named.values())
-
-        if named == 0:
-            if conditional:
-                result = conditional
-            else:
-                result = '+0'
-        else:
-            if conditional:
-                result = f'+{named}\n{conditional}'
-            else:
-                result = f'+{named}'
-
-        return result
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, Modifier):
-            result = (self.named == other.named
-                      and self.conditional == other.conditional)
-        else:
-            result = int(self) == other
-        return result
-
-    def __lt__(self, other: Any) -> bool:
-        try:
-            result = int(self) < int(other)
-        except TypeError:
-            result = NotImplemented
-        return result
-
-    def __int__(self) -> int:
-        return sum(bonus for bonus in self.named.values())
-
-    def __getitem__(self, item: str) -> int:
-        value = self.named.get(item, 0)
-        return value
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self.named)
-
-    def __add__(self, other: 'Modifier') -> 'Modifier':
-        if isinstance(other, Modifier):
-            new_conditional = self.conditional | set(other.conditional)
-            names_self = set(self.named)
-            names_other = set(other)
-
-            self_only = names_self - names_other
-            other_only = names_other - names_self
-            both = names_self & names_other
-
-            new_named = {}
-            for name in self_only:
-                new_named[name] = self.named[name]
-            for name in other_only:
-                new_named[name] = other[name]
-
-            for name in both:
-                if name in self.stackable:
-                    new_named[name] = self.named[name] + other[name]
-                else:
-                    new_named[name] = max(self.named[name], other[name])
-
-            result = type(self)(*new_conditional, **new_named)
-        else:
-            result = NotImplemented
-
-        return result
-
-    __radd__ = __add__
-
-    def __mul__(self, other: int) -> 'Modifier':
-        if self.is_simple:
-            raise AmbiguousOperationError(
-                'Multiplication of unspecified or complex modifier is ambiguous'
-            )
-        name, value = self._unique
-        return Modifier(**{name: other * value})
-
-    __rmul__ = __mul__
-
-    def __neg__(self) -> 'Modifier':
-        if self.is_simple:
-            raise AmbiguousOperationError(
-                'Negation of unspecified or complex modifier is ambiguous'
-            )
-        name, value = self._unique
-        return Modifier(**{name: -value})
-
-    @property
-    def _unique(self) -> Tuple[str, int]:
-        # noinspection PyTypeChecker
-        return next(iter(self.named.items()))
-
-
 class Progression:
     """A progression of modifiers."""
 
     def __init__(self, modifier_name: str, *values: int) -> None:
-        self.modifier_name = modifier_name
-        self.modifiers = [Modifier(**{modifier_name: v}) for v in values]
+        self._modifier_type = num.ModifierType(modifier_name)
+        self._modifiers = [num.Modifier(v, self._modifier_type) for v in values]
 
     def __repr__(self) -> str:
-        values = ', '.join(str(int(m)) for m in self.modifiers)
+        values = ', '.join(str(int(m)) for m in self._modifiers)
         if values:
             suffix = f', {values})'
         else:
             suffix = ')'
-        return f"{type(self).__name__}('{self.modifier_name}'" + suffix
+        return f"{type(self).__name__}('{self._modifier_type.name}'" + suffix
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Progression):
@@ -182,45 +55,46 @@ class Progression:
         return result
 
     def __len__(self) -> int:
-        return len(self.modifiers)
+        return len(self._modifiers)
 
-    def __getitem__(self, item: int) -> Modifier:
-        return self.modifiers[item]
+    def __getitem__(self, item: int) -> num.Modifier:
+        return self._modifiers[item]
 
-    def __iter__(self) -> Iterator[Modifier]:
-        return iter(self.modifiers)
+    def __iter__(self) -> Iterator[num.Modifier]:
+        return iter(self._modifiers)
 
 
 class Size:
     """Size of a creature."""
 
-    def __init__(self, name: str, modifier: int) -> None:
+    modifier_type = num.ModifierType('size')
+
+    def __init__(self, name: str, modifier_value: int) -> None:
         self.name = name
-        self.modifier = Modifier(size=modifier)
+        self.modifier = num.Modifier(modifier_value, self.modifier_type)
 
     @property
-    def attack_bonus(self) -> Modifier:
+    def attack_bonus(self) -> num.Modifier:
         """Attack bonus modifier."""
         return -self.modifier
 
     @property
-    def armor_class(self) -> Modifier:
+    def armor_class(self) -> num.Modifier:
         """Armor class modifier."""
         return -self.modifier
 
     @property
-    def grapple(self) -> Modifier:
+    def grapple(self) -> num.Modifier:
         """Grapple attack modifier."""
-        return self.modifier * 4
+        return 4 * self.modifier
 
     @property
-    def hide(self) -> Modifier:
+    def hide(self) -> num.Modifier:
         """Hide modifier."""
-        return self.modifier * -4
+        return -4 * self.modifier
 
     def __repr__(self) -> str:
-        modifier = self.modifier['size']
-        return f'{type(self).__name__}({repr(self.name)}, {modifier})'
+        return f'{type(self).__name__}({repr(self.name)}, {int(self.modifier)})'
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Size):
@@ -234,13 +108,15 @@ class Size:
 class AbilityScore:
     """Ability score for a creature."""
 
+    modifier_type = num.ModifierType('ability')
+
     def __init__(self, score: int = 10) -> None:
         self.score = score
 
     @property
-    def modifier(self) -> Modifier:
+    def modifier(self) -> num.Modifier:
         """Modifier associated with the ability score."""
-        return Modifier(ability=(self.score - 10) // 2)
+        return num.Modifier((self.score - 10) // 2, self.modifier_type)
 
     def __repr__(self) -> str:
         return f'{type(self).__name__}({self.score})'
@@ -393,9 +269,9 @@ class Race(core.Aggregator, ignore={'name'}):
         self._speed = speed
         self._languages = languages
 
-        self._fortitude = Modifier()
-        self._reflex = Modifier()
-        self._will = Modifier()
+        self._fortitude = num.Modifier()
+        self._reflex = num.Modifier()
+        self._will = num.Modifier()
 
         if bonus_languages is not None:
             self.bonus_languages = list(bonus_languages)
@@ -407,42 +283,42 @@ class Race(core.Aggregator, ignore={'name'}):
             setattr(self, feature, definition)
 
     @property
-    def fortitude(self) -> Modifier:
+    def fortitude(self) -> num.Modifier:
         """Racial bonus to fortitude save."""
         return self._save_bonus('_fortitude')
 
     @fortitude.setter
-    def fortitude(self, modifier: Modifier) -> None:
+    def fortitude(self, modifier: num.Modifier) -> None:
         self._fortitude = modifier
 
     @property
-    def reflex(self) -> Modifier:
+    def reflex(self) -> num.Modifier:
         """Racial bonus to reflex save."""
         return self._save_bonus('_reflex')
 
     @reflex.setter
-    def reflex(self, modifier: Modifier) -> None:
+    def reflex(self, modifier: num.Modifier) -> None:
         self._reflex = modifier
 
     @property
-    def will(self) -> Modifier:
+    def will(self) -> num.Modifier:
         """Racial bonus to will save."""
         return self._save_bonus('_will')
 
     @will.setter
-    def will(self, modifier: Modifier) -> None:
+    def will(self, modifier: num.Modifier) -> None:
         self._will = modifier
 
-    def _save_bonus(self, name: str) -> Modifier:
+    def _save_bonus(self, name: str) -> num.Modifier:
         try:
-            specific: Modifier = getattr(self, name)
+            specific: num.Modifier = getattr(self, name)
         except AttributeError:
-            specific = Modifier()
+            specific = num.Modifier()
 
         try:
-            generic: Modifier = self.saving_throws
+            generic: num.Modifier = self.saving_throws
         except AttributeError:
-            generic = Modifier()
+            generic = num.Modifier()
 
         return generic + specific
 
@@ -522,22 +398,22 @@ class ClassLevel(core.Aggregator, ignore={'class_', 'level'}):
         self.level = level
 
     @property
-    def base_attack_bonus(self) -> Modifier:
+    def base_attack_bonus(self) -> num.Modifier:
         """Base attack bonus for the given level."""
         return self.class_.base_attack_bonus[self.level]
 
     @property
-    def fort_save(self) -> Modifier:
+    def fort_save(self) -> num.Modifier:
         """Fortitude saving throw bonus for the given level."""
         return self.class_.fort_save[self.level]
 
     @property
-    def ref_save(self) -> Modifier:
+    def ref_save(self) -> num.Modifier:
         """Reflex saving throw bonus for the given level."""
         return self.class_.ref_save[self.level]
 
     @property
-    def will_save(self) -> Modifier:
+    def will_save(self) -> num.Modifier:
         """Will saving throw bonus for the given level."""
         return self.class_.will_save[self.level]
 

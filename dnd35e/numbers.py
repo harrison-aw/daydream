@@ -326,6 +326,9 @@ class Modifier:
 
     __rmul__ = __mul__
 
+    def __neg__(self) -> 'Modifier':
+        return type(self)(-self.value, self.type, self.condition)
+
     def __lt__(self, other: Any) -> Union[bool, 'NotImplemented']:
         if isinstance(other, Modifier):
             # pylint: disable=protected-access
@@ -341,6 +344,9 @@ class Modifier:
         else:
             result = NotImplemented
         return result
+
+    def __int__(self) -> int:
+        return self.value
 
 
 _ModifierKey = Tuple[ModifierType, bool, Optional[core.Condition]]

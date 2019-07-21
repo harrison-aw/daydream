@@ -22,66 +22,15 @@
 
 # pylint: disable=W,C,R
 
+import dnd35e.core as core
 import dnd35e.concepts as concepts
-import dnd35e.numbers as numbers
-
-
-class TestModifier:
-    def test_handles_simple_init(self):
-        modifier = concepts.Modifier(unnamed=10)
-        assert modifier == 10
-
-    def test_handles_conditional(self):
-        modifier = concepts.Modifier('+1 racial bonus on attack rolls '
-                                     'against orcs and goblinoids.')
-        assert modifier == 0
-        assert str(modifier) == '+1 racial bonus on attack rolls ' \
-                                'against orcs and goblinoids.'
-
-    def test_repr_is_readable(self):
-        modifier = concepts.Modifier(unnamed=10)
-        assert repr(modifier) == 'Modifier(unnamed=10)'
-
-    def test_repr_is_evaluable(self):
-        modifier = concepts.Modifier('test conditional', racial=10)
-        repr_ = repr(modifier)
-        modifier_evaluated = eval(repr_, {'Modifier': concepts.Modifier})
-        assert modifier == modifier_evaluated
-
-    def test_undefined_typed_bonuses_return_zero(self):
-        modifier = concepts.Modifier(dodge=3)
-        assert modifier['wrong'] == 0
-
-    def test_adding_bonuses(self):
-        modifier1 = concepts.Modifier('+1 test', '+1 too',
-                                      unnamed=3, dodge=2, racial=3)
-        modifier2 = concepts.Modifier('+1 test',
-                                      unnamed=1, dodge=2, racial=2)
-
-        sum_ = modifier1 + modifier2
-
-        desired = concepts.Modifier('+1 test', '+1 too',
-                                    unnamed=4, dodge=4, racial=3)
-        assert sum_ == desired
-
-    def test_bonus_string(self):
-        modifier = concepts.Modifier(dodge=3)
-        assert str(modifier) == '+3'
-
-    def test_conditional_string(self):
-        modifier = concepts.Modifier('+1 if blind', racial=1)
-        assert str(modifier) == '+1\n+1 if blind'
-
-    def test_iteration(self):
-        modifier = concepts.Modifier('+1 test', '+1 too',
-                                     unnamed=3, dodge=2, racial=3)
-        assert set(modifier) == {'unnamed', 'dodge', 'racial'}
+import dnd35e.numbers as num
 
 
 class TestProgression:
     def test_create_save(self):
         good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
-        assert good_save[2] == concepts.Modifier(save=3)
+        assert good_save[2] == num.Modifier(3, num.ModifierType('save'))
 
     def test_repr_evaluates(self):
         good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
@@ -97,29 +46,29 @@ class TestSize:
 
     def test_small_attack_bonus(self):
         small = concepts.Size('Small', -1)
-        assert small.attack_bonus == 1
+        assert small.attack_bonus == num.Modifier(1, concepts.Size.modifier_type)
 
     def test_small_armor_class(self):
         small = concepts.Size('Small', -1)
-        assert small.armor_class == 1
+        assert small.armor_class == num.Modifier(1, concepts.Size.modifier_type)
 
     def test_small_grapple(self):
         small = concepts.Size('Small', -1)
-        assert small.grapple == -4
+        assert small.grapple == num.Modifier(-4, concepts.Size.modifier_type)
 
     def test_small_hide(self):
         small = concepts.Size('Small', -1)
-        assert small.hide == 4
+        assert small.hide == num.Modifier(4, concepts.Size.modifier_type)
 
 
 class TestAbilityScore:
     def test_positive_modifier(self):
         score = concepts.AbilityScore(17)
-        assert score.modifier == 3
+        assert score.modifier == num.Modifier(3, concepts.AbilityScore.modifier_type)
 
     def test_negative_modifier(self):
         score = concepts.AbilityScore(7)
-        assert score.modifier == -2
+        assert score.modifier == num.Modifier(-2, concepts.AbilityScore.modifier_type)
 
 
 class TestAbilityType:
@@ -138,8 +87,9 @@ class TestAbility:
     def test_static_ability(self):
         stonecunning = concepts.Ability(
             'Stonecunning',
-            search=concepts.Modifier('+2 racial bonus to notice '
-                                     'unusual stonework')
+            search=num.Modifier(2,
+                                num.ModifierType('racial'),
+                                core.Condition('to notice unusual stonework'))
         )
         assert str(stonecunning.search) == '+2 racial bonus to notice' \
                                            ' unusual stonework'
@@ -147,7 +97,7 @@ class TestAbility:
     def test_sneak_attack(self):
         sneak_attack = concepts.Ability(
             'Sneak attack +1d6',
-            damage=numbers.DicePool(d6=1)
+            damage=num.DicePool(d6=1)
         )
         assert str(sneak_attack) == 'Sneak attack +1d6'
 
@@ -164,9 +114,9 @@ class TestClassFeature:
         sneak_attack = concepts.ClassFeature(
             'Sneak attack',
             first=concepts.Ability('Sneak attack +1d6', None, '',
-                                   damage=numbers.DicePool(d6=1)),
+                                   damage=num.DicePool(d6=1)),
             third=concepts.Ability('Sneak attack +2d6', None, '',
-                                   damage=numbers.DicePool(d6=2)),
+                                   damage=num.DicePool(d6=2)),
         )
         assert str(sneak_attack[4]) == 'Sneak attack +2d6'
 
@@ -176,9 +126,9 @@ class TestClass:
         sneak_attack = concepts.ClassFeature(
             'Sneak attack',
             first=concepts.Ability('Sneak attack +1d6',
-                                   damage=numbers.DicePool(d6=1)),
+                                   damage=num.DicePool(d6=1)),
             third=concepts.Ability('Sneak attack +2d6',
-                                   damage=numbers.DicePool(d6=2)),
+                                   damage=num.DicePool(d6=2)),
         )
         trapfinding = concepts.ClassFeature('Trapfinding', '')
         evasion = concepts.ClassFeature(
@@ -194,7 +144,7 @@ class TestClass:
         good_save = concepts.Progression('save', 2, 3, 3)
         rogue = concepts.Class(
             None,
-            numbers.Die(6),
+            num.Die(6),
             [],
             8,
             average_bab,
