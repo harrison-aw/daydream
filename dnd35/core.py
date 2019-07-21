@@ -44,12 +44,12 @@
 
 """Low-level, core functionality for DayDream3.5"""
 
-__all__ = ['DayDreamError', 'Aggregator', 'ordinal']
+__all__ = ['DayDreamError', 'Aggregator']
 
 from copy import copy
 from functools import reduce
 from operator import add
-from typing import Any, AbstractSet, Set, Optional, overload
+from typing import Any, AbstractSet, Set, Optional
 from dataclasses import dataclass
 
 
@@ -138,50 +138,3 @@ class Aggregator:
     @property
     def _known_names(self) -> Set[str]:
         return set(self._ignore | set(self._instance_names))
-
-
-_ORDINALS = ('zeroth', 'first', 'second', 'third', 'fourth', 'fifth',
-             'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh',
-             'twelfth', 'thirteenth', 'fourteenth', 'sixteenth',
-             'eighteenth', 'nineteenth', 'twentieth')
-
-
-def _integer_to_ordinal(value: int) -> str:
-    if value < 0:
-        raise ValueError('Cannot convert a negative number to an ordinal')
-
-    try:
-        return _ORDINALS[value]
-    except IndexError:
-        raise NotImplementedError('Cannot convert a number greater than twenty'
-                                  ' to an ordinal') from None
-
-
-def _ordinal_to_integer(value: str) -> int:
-    try:
-        return _ORDINALS.index(value)
-    except ValueError:
-        raise ValueError(f'Unable to convert {value} to an integer')
-
-
-@overload
-def ordinal(value: int) -> str:  # pylint: disable=unused-argument
-    """Convert an integer to an ordinal string."""
-    ...
-
-
-@overload
-def ordinal(value: str) -> int:  # pylint: disable=unused-argument, function-redefined, line-too-long
-    """Convert an ordinal string into the corresponding integer."""
-    ...
-
-
-def ordinal(value):  # pylint: disable-msg=function-redefined
-    """Convert an ordinal string to its corresponding integer or vice versa."""
-    if isinstance(value, int):
-        result = _integer_to_ordinal(value)
-    elif isinstance(value, str):
-        result = _ordinal_to_integer(value)
-    else:
-        raise NotImplementedError(f'Unable to convert {type(value)}')
-    return result

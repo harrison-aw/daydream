@@ -50,11 +50,3 @@ class TestAggregator:
 
         instance = Root()
         assert instance.x == 7
-
-
-class TestOrdinals:
-    def test_ordinal_to_integer(self):
-        assert core.ordinal(10) == 'tenth'
-
-    def test_integer_to_ordinal(self):
-        assert core.ordinal('fifth') == 5

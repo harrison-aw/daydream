@@ -22,9 +22,10 @@
 
 """Classes and helper function for working with numerical values."""
 
-__all__ = ['Die', 'DicePool']
+__all__ = ['Die', 'DicePool', 'ordinal']
 
-from typing import Tuple, List, Any, Union, DefaultDict, Dict, Optional
+from typing import Tuple, List, Any, Union, DefaultDict, Dict, Optional, \
+    overload
 from copy import deepcopy
 from collections import defaultdict
 from itertools import chain
@@ -32,6 +33,53 @@ from functools import total_ordering
 from dataclasses import dataclass
 
 import dnd35.core as core
+
+
+_ORDINALS = ('zeroth', 'first', 'second', 'third', 'fourth', 'fifth',
+             'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh',
+             'twelfth', 'thirteenth', 'fourteenth', 'sixteenth',
+             'eighteenth', 'nineteenth', 'twentieth')
+
+
+def _integer_to_ordinal(value: int) -> str:
+    if value < 0:
+        raise ValueError('Cannot convert a negative number to an ordinal')
+
+    try:
+        return _ORDINALS[value]
+    except IndexError:
+        raise NotImplementedError('Cannot convert a number greater than twenty'
+                                  ' to an ordinal') from None
+
+
+def _ordinal_to_integer(value: str) -> int:
+    try:
+        return _ORDINALS.index(value)
+    except ValueError:
+        raise ValueError(f'Unable to convert {value} to an integer')
+
+
+@overload
+def ordinal(value: int) -> str:  # pylint: disable=unused-argument
+    """Convert an integer to an ordinal string."""
+    ...
+
+
+@overload
+def ordinal(value: str) -> int:  # pylint: disable=unused-argument, function-redefined, line-too-long
+    """Convert an ordinal string into the corresponding integer."""
+    ...
+
+
+def ordinal(value):  # pylint: disable-msg=function-redefined
+    """Convert an ordinal string to its corresponding integer or vice versa."""
+    if isinstance(value, int):
+        result = _integer_to_ordinal(value)
+    elif isinstance(value, str):
+        result = _ordinal_to_integer(value)
+    else:
+        raise NotImplementedError(f'Unable to convert {type(value)}')
+    return result
 
 
 @total_ordering

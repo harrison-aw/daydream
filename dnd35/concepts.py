@@ -30,7 +30,7 @@ from typing import Any, Tuple, List, Optional, Iterable, SupportsInt, Iterator, 
     Set, Sequence, Dict, Union
 
 import dnd35.core as core
-import dnd35.numbers as numbers
+import dnd35.numbers as num
 
 
 class AmbiguousOperationError(core.DayDreamError):
@@ -458,13 +458,13 @@ class ClassFeature:
         self.name = name
         self.description = description
 
-        self.progression = {core.ordinal(level): ability
+        self.progression = {num.ordinal(level): ability
                             for level, ability in progression.items()}
 
     def __repr__(self) -> str:
         prefix = f'{type(self).__name__}({repr(self.name)},' \
             f' {repr(self.description)}'
-        progression = ', '.join(f'{core.ordinal(level)}={repr(ability)}'
+        progression = ', '.join(f'{num.ordinal(level)}={repr(ability)}'
                                 for level, ability in self.progression.items())
         if progression:
             result = prefix + ', ' + progression + ')'
@@ -493,7 +493,7 @@ class Class:
 
     def __init__(self,
                  alignment_restriction: Optional[List[str]],
-                 hit_die: numbers.Die,
+                 hit_die: num.Die,
                  class_skills: List[str],
                  skill_points_per_level: int,
                  base_attack_bonus: Progression,

@@ -29,6 +29,13 @@ import dnd35.numbers as num
 
 # pylint: disable=no-self-use, eval-used
 
+class TestOrdinals:
+    def test_ordinal_to_integer(self):
+        assert num.ordinal(10) == 'tenth'
+
+    def test_integer_to_ordinal(self):
+        assert num.ordinal('fifth') == 5
+
 
 class TestDie:
     """Tests for the Die class."""
