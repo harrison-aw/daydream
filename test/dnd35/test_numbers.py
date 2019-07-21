@@ -30,10 +30,14 @@ import dnd35e.numbers as num
 # pylint: disable=no-self-use, eval-used
 
 class TestOrdinals:
+    """Test the ordinal helper function."""
+
     def test_ordinal_to_integer(self):
+        """Ensure that numbers are correctly converted to ordinals."""
         assert num.ordinal(10) == 'tenth'
 
     def test_integer_to_ordinal(self):
+        """Ensure that ordinals are correctly converted to numbers."""
         assert num.ordinal('fifth') == 5
 
 
