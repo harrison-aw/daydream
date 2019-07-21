@@ -20,64 +20,88 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-# pylint: disable=W,C,R
+"""Tests for the concepts module."""
 
 import dnd35e.core as core
 import dnd35e.concepts as concepts
 import dnd35e.numbers as num
 
 
+# pylint: disable=no-self-use, eval-used
+
+
 class TestProgression:
+    """Tests for the progression class."""
+
     def test_create_save(self):
+        """Ensure that a progression is correctly structured."""
         good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
         assert good_save[2] == num.Modifier(3, num.ModifierType('save'))
 
     def test_repr_evaluates(self):
+        """Ensure that the repr can recreate a progression."""
         good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
         assert (eval(repr(good_save), {'Progression': concepts.Progression})
                 == good_save)
 
 
 class TestSize:
-    def test_repr_is_evaluable(self):
+    """Tests for the size class."""
+
+    def test_repr_evaluates(self):
+        """Ensure that the repr can recreate a Size instance."""
         small = concepts.Size('Small', -1)
         assert eval(repr(small), {'Size': concepts.Size}) == small
 
-    def test_small_attack_bonus(self):
+    def test_small_attack_modifier(self):
+        """Ensure that the attack modifier is properly computed."""
         small = concepts.Size('Small', -1)
-        assert small.attack_bonus == num.Modifier(1, concepts.Size.modifier_type)
+        assert small.attack == num.Modifier(1, concepts.Size.modifier_type)
 
     def test_small_armor_class(self):
+        """Ensure that the armor class modifier is properly computed."""
         small = concepts.Size('Small', -1)
         assert small.armor_class == num.Modifier(1, concepts.Size.modifier_type)
 
     def test_small_grapple(self):
+        """Ensure that the grapple modifier is properly computed."""
         small = concepts.Size('Small', -1)
         assert small.grapple == num.Modifier(-4, concepts.Size.modifier_type)
 
     def test_small_hide(self):
+        """Ensure that the hide modifier is properly computed."""
         small = concepts.Size('Small', -1)
         assert small.hide == num.Modifier(4, concepts.Size.modifier_type)
 
 
 class TestAbilityScore:
+    """Tests for the ability score class."""
+
     def test_positive_modifier(self):
+        """Ensure that the modifier is correct for high scores."""
         score = concepts.AbilityScore(17)
-        assert score.modifier == num.Modifier(3, concepts.AbilityScore.modifier_type)
+        assert (score.modifier
+                == num.Modifier(3, concepts.AbilityScore.modifier_type))
 
     def test_negative_modifier(self):
+        """Ensure that the modifier is correct for low scores."""
         score = concepts.AbilityScore(7)
-        assert score.modifier == num.Modifier(-2, concepts.AbilityScore.modifier_type)
+        assert (score.modifier
+                == num.Modifier(-2, concepts.AbilityScore.modifier_type))
 
 
 class TestAbilityType:
+    """Tests for the ability type class."""
+
     def test_repr_evaluates(self):
+        """Ensure that the repr can be used to recreate an instance."""
         ability = concepts.AbilityType('Supernatural', 'Su')
         ability_copy = eval(repr(ability),
                             {'AbilityType': concepts.AbilityType})
         assert ability == ability_copy
 
     def test_str(self):
+        """Ensure that the string representation is as expected."""
         ability = concepts.AbilityType('Supernatural', 'Su')
         assert str(ability) == 'Supernatural (Su)'
 

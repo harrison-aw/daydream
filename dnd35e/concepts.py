@@ -20,13 +20,14 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-"""Implements basic concepts used in defining game entities."""
+"""Implements basic concepts used in game rules."""
 
 __all__ = ['Size', 'AbilityScore', 'Race']
 
 from collections import Counter
 from typing import Any, List, Optional, Iterable, SupportsInt, Iterator, \
     Set, Sequence, Dict, Union
+from dataclasses import dataclass
 
 import dnd35e.core as core
 import dnd35e.numbers as num
@@ -34,6 +35,11 @@ import dnd35e.numbers as num
 
 class Progression:
     """A progression of modifiers.
+
+    Character classes have a number of modifiers that increase with
+    level progression such as base attack bonus and various saving
+    throws (fortitude, reflex, and will). This class allows those to be
+    easily created in a list-like object.
 
     :param modifier_name: name of modifier in progression, defines
         modifier type
@@ -73,58 +79,72 @@ class Progression:
 
 
 class Size:
-    """Size of a creature."""
+    """Size of a creature.
+
+    :param name: name of the size category this value represents
+    :param modifier_value: base value for size modifiers
+    """
 
     modifier_type = num.ModifierType('size')
 
-    def __init__(self, name: str, modifier_value: int) -> None:
-        self.name = name
-        self.modifier = num.Modifier(modifier_value, self.modifier_type)
+    @property
+    def name(self) -> str:
+        """Name of the size category."""
+        return self._name
 
     @property
-    def attack_bonus(self) -> num.Modifier:
+    def attack(self) -> num.Modifier:
         """Attack bonus modifier."""
-        return -self.modifier
+        return -self._modifier
 
     @property
     def armor_class(self) -> num.Modifier:
         """Armor class modifier."""
-        return -self.modifier
+        return -self._modifier
 
     @property
     def grapple(self) -> num.Modifier:
         """Grapple attack modifier."""
-        return 4 * self.modifier
+        return 4 * self._modifier
 
     @property
     def hide(self) -> num.Modifier:
         """Hide modifier."""
-        return -4 * self.modifier
+        return -4 * self._modifier
+
+    def __init__(self, name: str, modifier_value: int) -> None:
+        self._name = name
+        self._modifier = num.Modifier(modifier_value, self.modifier_type)
 
     def __repr__(self) -> str:
-        return f'{type(self).__name__}({repr(self.name)}, {int(self.modifier)})'
+        return (type(self).__name__
+                + f'({repr(self._name)}, {int(self._modifier)})')
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Size):
-            result = (self.name == other.name
-                      and self.modifier == other.modifier)
+            # pylint: disable=protected-access
+            result = (self._name == other._name
+                      and self._modifier == other._modifier)
         else:
             result = NotImplemented
         return result
 
 
 class AbilityScore:
-    """Ability score for a creature."""
+    """Ability score for a creature.
+
+    :param score: value of the ability score, typically between 3 and 20.
+    """
 
     modifier_type = num.ModifierType('ability')
-
-    def __init__(self, score: int = 10) -> None:
-        self.score = score
 
     @property
     def modifier(self) -> num.Modifier:
         """Modifier associated with the ability score."""
         return num.Modifier((self.score - 10) // 2, self.modifier_type)
+
+    def __init__(self, score: int = 10) -> None:
+        self.score = score
 
     def __repr__(self) -> str:
         return f'{type(self).__name__}({self.score})'
@@ -163,24 +183,20 @@ class AbilityScore:
         return result
 
 
+@dataclass(frozen=True)
 class AbilityType:
-    """A type classification for abilities."""
+    # noinspection PyUnresolvedReferences
+    """A type classification for abilities.
 
-    def __init__(self, name: str, abbreviation: Optional[str] = None) -> None:
-        self.name = name
-        self.abbreviation = abbreviation
+    Abilities are categorized by their source: natural, supernatural,
+    extraordinary, etc. This defines data relevant to the type.
 
-    def __repr__(self) -> str:
-        return (type(self).__name__
-                + f'({repr(self.name)}, {repr(self.abbreviation)})')
+    :param name: name of the type
+    :param abbreviation: abbreviated name of the type
+    """
 
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, AbilityType):
-            result = (self.name == other.name
-                      and self.abbreviation == other.abbreviation)
-        else:
-            result = NotImplemented
-        return result
+    name: str
+    abbreviation: Optional[str] = None
 
     def __str__(self) -> str:
         result = self.name
