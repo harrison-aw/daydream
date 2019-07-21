@@ -255,9 +255,11 @@ class Modifier:
                 result = Modifier(self.value + other.value, self.type)
             else:
                 if self.is_bonus and other.is_bonus:
-                    result = Modifier(max(self.value, other.value), self.type)
+                    result = type(self)(max(self.value, other.value),
+                                        self.type)
                 elif self.is_penalty and other.is_penalty:
-                    result = Modifier(min(self.value, other.value), self.type)
+                    result = type(self)(min(self.value, other.value),
+                                        self.type)
                 else:
                     raise BonusAndPenaltyCombinationError(
                         f'Combining a bonus and a penalty loses information: '
@@ -287,6 +289,12 @@ class Modifier:
 _ModifierKey = Tuple[ModifierType, bool, Optional[core.Condition]]
 
 
+def _key(modifier: Modifier) -> _ModifierKey:
+    return (modifier.type,
+            modifier.type.stacks or modifier.is_bonus,
+            modifier.condition)
+
+
 class ModifierTotal:
     """A sum of modifiers.
 
@@ -307,9 +315,7 @@ class ModifierTotal:
     def __init__(self, *modifiers: Modifier):
         self._modifiers: Dict[_ModifierKey, Modifier] = {}
         for mod in modifiers:
-            key = (mod.type,
-                   mod.type.stacks or mod.is_bonus,
-                   mod.condition)
+            key = _key(mod)
             if key in self._modifiers:
                 self._modifiers[key] += mod
             else:
@@ -326,3 +332,16 @@ class ModifierTotal:
         else:
             result = NotImplemented
         return result
+
+    def __add__(self, other: Any) -> Union['ModifierTotal', 'NotImplemented']:
+        if isinstance(other, ModifierTotal):
+            # pylint: disable=protected-access
+            result = type(self)(*self._modifiers.values(),
+                                *other._modifiers.values())
+        elif isinstance(other, Modifier):
+            result = type(self)(other, *self._modifiers.values())
+        else:
+            result = NotImplemented
+        return result
+
+    __radd__ = __add__

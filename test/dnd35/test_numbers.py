@@ -233,3 +233,26 @@ class TestModifierTotal:
         )
         total = num.ModifierTotal(static_mod, conditional_mod)
         assert total.value(*total.conditions) == 5
+
+    def test_add_totals(self):
+        """Ensure that two modifiers are added together."""
+        total1 = num.ModifierTotal(num.Modifier(5),
+                                   num.Modifier(2, num.ModifierType('armor')))
+        total2 = num.ModifierTotal(num.Modifier(2),
+                                   num.Modifier(3, num.ModifierType('armor')),
+                                   num.Modifier(4, num.ModifierType('ability')))
+        assert total1 + total2 == num.ModifierTotal(
+            num.Modifier(7),
+            num.Modifier(3, num.ModifierType('armor')),
+            num.Modifier(4, num.ModifierType('ability')),
+        )
+
+    def test_add_modifier_to_total(self):
+        """Ensure that a modifier can be added to a modifier total."""
+        total = num.ModifierTotal(num.Modifier(5),
+                                  num.Modifier(2, num.ModifierType('armor')))
+        modifier = num.Modifier(2)
+        assert modifier + total == num.ModifierTotal(
+            num.Modifier(7),
+            num.Modifier(2, num.ModifierType('armor')),
+        )
