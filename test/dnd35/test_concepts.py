@@ -107,7 +107,10 @@ class TestAbilityType:
 
 
 class TestAbility:
+    """Tests for the ability class"""
+
     def test_static_ability(self):
+        """Ensure that a feature is initialized properly."""
         stonecunning = concepts.Ability(
             'Stonecunning',
             search=num.Modifier(2,
@@ -117,14 +120,8 @@ class TestAbility:
         assert str(stonecunning.search) == '+2 racial bonus to notice' \
                                            ' unusual stonework'
 
-    def test_sneak_attack(self):
-        sneak_attack = concepts.Ability(
-            'Sneak attack +1d6',
-            damage=num.DicePool(d6=1)
-        )
-        assert str(sneak_attack) == 'Sneak attack +1d6'
-
     def test_delete_features(self):
+        """Ensure that features are properly removed when deleted."""
         ability = concepts.Ability('Test', test=10)
 
         assert ability.test == 10

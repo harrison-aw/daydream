@@ -207,7 +207,37 @@ class AbilityType:
 
 class Ability(core.Aggregator,
               ignore={'name', 'ability_type', 'description'}):
-    """Character abilities."""
+    """Character abilities.
+
+    This represents any ability that a character can gain from any
+    source (race, class, feat, etc.). An example is the "Stonecunning"
+    ability granted by the Dwarven race.
+
+    :param name: name of the ability
+    :param ability_type: type of the ability, describes the source of
+        the ability
+    :param description: describes what the ability grants and details of
+        how it functions
+    :param features: objects that programmatically define the behavior
+        of the ability such as modifiers it grants.
+    """
+
+    default_ability_type = AbilityType('Natural')
+
+    @property
+    def name(self) -> str:
+        """Get the ability's name."""
+        return self._name
+
+    @property
+    def ability_type(self) -> AbilityType:
+        """Get the ability's type."""
+        return self._ability_type
+
+    @property
+    def description(self) -> str:
+        """Get the ability's description."""
+        return self._description
 
     def __init__(self,
                  name: str,
@@ -216,9 +246,12 @@ class Ability(core.Aggregator,
                  **features: Any) -> None:
         super().__init__()
 
-        self.name = name
-        self.ability_type = ability_type
-        self.description = description
+        self._name = name
+        if ability_type is None:
+            self._ability_type = AbilityType('')
+        else:
+            self._ability_type = self.default_ability_type
+        self._description = description
 
         self._features: Set[str] = set()
         for feature, definition in features.items():
@@ -231,9 +264,9 @@ class Ability(core.Aggregator,
 
     def __repr__(self) -> str:
         class_name = type(self).__name__
-        ability_name = repr(self.name)
-        ability_type = repr(self.ability_type)
-        description = repr(self.description)
+        ability_name = repr(self._name)
+        ability_type = repr(self._ability_type)
+        description = repr(self._description)
         prefix = f'{class_name}({ability_name}, {ability_type}, {description}'
 
         features = ', '.join(f'{name}={repr(getattr(self, name))}'
@@ -244,12 +277,15 @@ class Ability(core.Aggregator,
             result = prefix + ')'
         return result
 
+    def __str__(self) -> str:
+        return self._name
+
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Ability):
             # pylint: disable-msg=protected-access
-            result = (self.name == other.name
-                      and self.ability_type == other.ability_type
-                      and self.description == other.description
+            result = (self._name == other._name
+                      and self._ability_type == other._ability_type
+                      and self._description == other._description
                       and self._features == other._features
                       and all(getattr(self, a) == getattr(other, a)
                               for a in self._features))
@@ -257,18 +293,9 @@ class Ability(core.Aggregator,
             result = NotImplemented
         return result
 
-    def __str__(self) -> str:
-        return self.name
-
-    def __getitem__(self, item: int) -> Any:
-        if self.progression is None:
-            raise IndexError('Special ability does not have a progression.')
-
-        return self.progression[item]
-
 
 class Race(core.Aggregator, ignore={'name'}):
-    """Data used to define a character race."""
+    """A race for a character."""
 
     favored_class = 'Any'
 
@@ -277,6 +304,33 @@ class Race(core.Aggregator, ignore={'name'}):
         'Dwarven', 'Elven', 'Giant', 'Gnome', 'Goblin', 'Gnoll', 'Halfling',
         'Ignan', 'Infernal', 'Orc', 'Sylvan', 'Terran', 'Undercommon'
     ]
+
+    @property
+    def fortitude(self) -> num.Modifier:
+        """Racial bonus to fortitude save."""
+        return self._save_bonus('_fortitude')
+
+    @fortitude.setter
+    def fortitude(self, modifier: num.Modifier) -> None:
+        self._fortitude = modifier
+
+    @property
+    def reflex(self) -> num.Modifier:
+        """Racial bonus to reflex save."""
+        return self._save_bonus('_reflex')
+
+    @reflex.setter
+    def reflex(self, modifier: num.Modifier) -> None:
+        self._reflex = modifier
+
+    @property
+    def will(self) -> num.Modifier:
+        """Racial bonus to will save."""
+        return self._save_bonus('_will')
+
+    @will.setter
+    def will(self, modifier: num.Modifier) -> None:
+        self._will = modifier
 
     def __init__(self,
                  name: str,
@@ -305,33 +359,6 @@ class Race(core.Aggregator, ignore={'name'}):
 
         for feature, definition in features.items():
             setattr(self, feature, definition)
-
-    @property
-    def fortitude(self) -> num.Modifier:
-        """Racial bonus to fortitude save."""
-        return self._save_bonus('_fortitude')
-
-    @fortitude.setter
-    def fortitude(self, modifier: num.Modifier) -> None:
-        self._fortitude = modifier
-
-    @property
-    def reflex(self) -> num.Modifier:
-        """Racial bonus to reflex save."""
-        return self._save_bonus('_reflex')
-
-    @reflex.setter
-    def reflex(self, modifier: num.Modifier) -> None:
-        self._reflex = modifier
-
-    @property
-    def will(self) -> num.Modifier:
-        """Racial bonus to will save."""
-        return self._save_bonus('_will')
-
-    @will.setter
-    def will(self, modifier: num.Modifier) -> None:
-        self._will = modifier
 
     def _save_bonus(self, name: str) -> num.Modifier:
         try:
