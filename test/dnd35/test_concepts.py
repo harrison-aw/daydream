@@ -35,14 +35,17 @@ class TestProgression:
 
     def test_create_save(self):
         """Ensure that a progression is correctly structured."""
-        good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
+        good_save = concepts.Progression(num.ModifierType('save'),
+                                         2, 3, 3, 4, 4)
         assert good_save[2] == num.Modifier(3, num.ModifierType('save'))
 
     def test_repr_evaluates(self):
         """Ensure that the repr can recreate a progression."""
-        good_save = concepts.Progression('save', 2, 3, 3, 4, 4)
-        assert (eval(repr(good_save), {'Progression': concepts.Progression})
-                == good_save)
+        good_save = concepts.Progression(num.ModifierType('save'),
+                                         2, 3, 3, 4, 4)
+        namespace = {'Progression': concepts.Progression,
+                     'ModifierType': num.ModifierType}
+        assert eval(repr(good_save), namespace) == good_save
 
 
 class TestSize:

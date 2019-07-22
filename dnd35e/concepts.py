@@ -44,19 +44,18 @@ class Progression:
     :param values: the values of the modifiers in the the progression
     """
 
-    def __init__(self, modifier_name: str, *values: int) -> None:
-        modifier_type = num.ModifierType(modifier_name)
+    def __init__(self, modifier_type: num.ModifierType, *values: int) -> None:
         self._modifiers = [num.Modifier(v, modifier_type)
                            for v in values]
 
     def __repr__(self) -> str:
         values = ', '.join(str(int(m)) for m in self._modifiers)
         if values:
-            modifier_name = repr(self._modifiers[0].type.name)
+            modifier_type = repr(self._modifiers[0].type)
             values = ', ' + values
         else:
-            modifier_name = ''
-        return type(self).__name__ + f"({modifier_name}{values})"
+            modifier_type = ''
+        return type(self).__name__ + f"({modifier_type}{values})"
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Progression):
