@@ -22,141 +22,97 @@
 
 """Definitions from the SRD."""
 
-# pylint: disable=invalid-name
-
+import dnd35e.core as core
 import dnd35e.concepts as concepts
-import dnd35e.numbers as numbers
+import dnd35e.numbers as num
 
 
 # Dice
-d3 = numbers.Die(3)
-d4 = numbers.Die(4)
-d6 = numbers.Die(6)
-d8 = numbers.Die(8)
-d10 = numbers.Die(10)
-d12 = numbers.Die(12)
-d20 = numbers.Die(20)
+D3 = num.Die(3)
+D4 = num.Die(4)
+D6 = num.Die(6)
+D8 = num.Die(8)
+D10 = num.Die(10)
+D12 = num.Die(12)
+D20 = num.Die(20)
+
+
+# Modifier Types
+UNTYPED = num.ModifierType('untyped', stacks=True)
+ABILITY = num.ModifierType('ability')
+ALCHEMICAL = num.ModifierType('alchemical')
+ARMOR = num.ModifierType('armor')
+CIRCUMSTANCE = num.ModifierType('circumstance')
+COMPETENCE = num.ModifierType('competence')
+DEFLECTION = num.ModifierType('deflection')
+DODGE = num.ModifierType('dodge', stacks=True)
+ENHANCEMENT = num.ModifierType('enhancement')
+INSIGHT = num.ModifierType('insight')
+LUCK = num.ModifierType('luck')
+MORALE = num.ModifierType('morale')
+NATURAL_ARMOR = num.ModifierType('natural armor')
+PROFANE = num.ModifierType('profane')
+RACIAL = num.ModifierType('racial')
+RESISTANCE = num.ModifierType('resistance')
+SACRED = num.ModifierType('sacred')
+SHIELD = num.ModifierType('shield')
+SIZE = num.ModifierType('size')
+BASE_SAVE = num.ModifierType('base save')
+BASE_ATTACK = num.ModifierType('base attack')
 
 
 # Base saving throw progressions
-good_base_save = concepts.Progression(
+GOOD_BASE_SAVE = concepts.Progression(
     'base save',
     2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12,
 )
-poor_base_save = concepts.Progression(
+POOR_BASE_SAVE = concepts.Progression(
     'base save',
     0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6,
 )
 
 
 # Base attack bonus progressions
-good_base_attack_bonus = concepts.Progression(
+GOOD_BASE_ATTACK = concepts.Progression(
     'base attack',
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
 )
-average_base_attack_bonus = concepts.Progression(
+AVERAGE_BASE_ATTACK = concepts.Progression(
     'base attack',
     0, 1, 2, 3, 3, 4, 5, 6, 6, 7, 8, 9, 9, 10, 11, 12, 12, 13, 14, 15,
 )
-poor_base_attack_bonus = concepts.Progression(
+POOR_BASE_ATTACK = concepts.Progression(
     'base attack',
     0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,
 )
 
 
 # Sizes
-fine = concepts.Size('Fine', +8)
-diminutive = concepts.Size('Diminutive', +4)
-tiny = concepts.Size('Tiny', +2)
-small = concepts.Size('Small', +1)
-medium = concepts.Size('Medium', +0)
-large = concepts.Size('Large', -1)
-huge = concepts.Size('Huge', -2)
-gargantuan = concepts.Size('Gargantuan', -4)
-colossal = concepts.Size('Colossal', -8)
+FINE = concepts.Size('Fine', +8)
+DIMINUTIVE = concepts.Size('Diminutive', +4)
+TINY = concepts.Size('Tiny', +2)
+SMALL = concepts.Size('Small', +1)
+MEDIUM = concepts.Size('Medium', +0)
+LARGE = concepts.Size('Large', -1)
+HUGE = concepts.Size('Huge', -2)
+GARGANTUAN = concepts.Size('Gargantuan', -4)
+COLOSSAL = concepts.Size('Colossal', -8)
 
 
 # Abilities
-darkvision = concepts.Ability('Darkvision')
-low_light_vision = concepts.Ability('Low-Light Vision')
+DARKVISION = concepts.Ability('Darkvision')
+LOW_LIGHT_VISION = concepts.Ability('Low-Light Vision')
 
-stonecunning = concepts.Ability(
+STONECUNNING = concepts.Ability(
     'Stonecunning',
-    search=concepts.Modifier(
-        '+2 racial bonus to notice unusual stonework'
-    )
+    search=num.Modifier(+2,
+                        RACIAL,
+                        core.Condition('to notice unusual stonework')),
 )
-stability = concepts.Ability(
+STABILITY = concepts.Ability(
     'Stability',
-    STR=concepts.Modifier(
-        '+4 on ability checks to resist being bull rushed or tripped '
-        'when standing on the ground'
-    )
-)
-
-
-# Races
-human = concepts.Race(
-    name='Human',
-    size=medium,
-    speed=30,
-    number_of_feats=1,
-    skill_points_per_level=1,
-    languages=['Common'],
-    bonus_languages=None,
-    favored_class=None,
-)
-dwarf = concepts.Race(
-    name='Dwarf',
-    constitution=+2,
-    charisma=-2,
-    size=medium,
-    speed=20,
-    darkvision=darkvision,
-    stonecunning=stonecunning,
-    weapon_familiarity=concepts.Ability('Weapon Familiarity'),
-    stability=stability,
-    saving_throws=concepts.Modifier('+2 racial bonus on saving throws '
-                                    'against poison.',
-                                    '+2 racial bonus on saving throws '
-                                    'against spells and spell-like effects.'),
-    attack_bonus=concepts.Modifier('+1 racial bonus on attack rolls '
-                                   'against orcs and goblinoids.'),
-    armor_class=concepts.Modifier('+4 dodge bonus to Armor Class against '
-                                  'monsters of the giant type.'),
-    appraise=concepts.Modifier('+2 racial bonus on Appraise checks that '
-                               'are related to stone or metal items.'),
-    craft=concepts.Modifier('+2 racial bonus on Craft checks that are '
-                            'related to stone or metal.'),
-    languages=['Common', 'Dwarven'],
-    bonus_languages=['Giant', 'Gnome', 'Goblin', 'Orc', 'Terran', 'Undercommon'],
-    favored_class='Fighter',
-)
-elf = concepts.Race(
-    name='Elf',
-    size=medium,
-    speed=30,
-    fortitude=concepts.Modifier('Immunity to magic sleep effects',
-                                '+2 racial saving throw bonus against '
-                                'enchantment spells or effects.'),
-    reflex=concepts.Modifier('Immunity to magic sleep effects',
-                             '+2 racial saving throw bonus against '
-                             'enchantment spells or effects.'),
-    will=concepts.Modifier('Immunity to magic sleep effects',
-                           '+2 racial saving throw bonus against '
-                           'enchantment spells or effects.'),
-    low_light_vision=low_light_vision,
-    feats=[
-        'Martial Weapon (longsword)',
-        'Martial Weapon (rapier)',
-        'Martial Weapon (longbow)',
-        'Martial Weapon (shortbow)',
-    ],
-    listen=concepts.Modifier(racial=+2),
-    search=concepts.Modifier(racial=+2),
-    spot=concepts.Modifier(racial=+2),
-    languages=['Common', 'Elven'],
-    bonus_languages=['Draconic', 'Gnoll', 'Gnome', 'Goblin', 'Orc',
-                     'Sylvan'],
-    favored_class='Wizard',
+    STR=num.Modifier(+4,
+                     UNTYPED,
+                     core.Condition('to resist being bull rushed or tripped '
+                                    'when standing on the ground')),
 )
