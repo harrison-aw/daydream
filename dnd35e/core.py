@@ -94,17 +94,17 @@ class Aggregator:
         super().__init_subclass__()
 
         if ignore is None:
-            cls._ignore = set()
+            cls._ignore: Set[str] = set()
         else:
             cls._ignore = set(ignore)
 
-        cls._instance_names = {k for k, v in vars(cls).items()
-                               if isinstance(v, property)}
+        cls._instance_names: Set[str] = {k for k, v in vars(cls).items()
+                                         if isinstance(v, property)}
 
     def __init__(self) -> None:
         """Initialize attribute name tracker."""
         super().__init__()
-        self._instance_names: Set[str] = copy(self._instance_names)
+        self._instance_names = copy(self._instance_names)
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Track any attributes that are added to an instance."""
