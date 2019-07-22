@@ -20,33 +20,44 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-# pylint: disable=W,C,R
+"""Tests for core functionality."""
 
 import dnd35e.core as core
 
 
+# pylint: disable=too-few-public-methods
 class TestAggregator:
+    """Test for aggregator subclasses."""
+
     def test_aggregates_from_children(self):
+        """Ensure that attributes with the same name are all combined."""
         class Leaf:
-            def __init__(self, x=1):
-                self.x = x
+            """A simple object with a `test` attribute."""
+
+            def __init__(self, test=1):
+                self.test = test
 
         class Branch(core.Aggregator):
-            def __init__(self, x=3):
+            """An object with a `test` attribute that needs aggregated."""
+
+            def __init__(self, test=3):
                 super().__init__()
-                self.x = x
+                self.test = test
                 self.leaf = Leaf()
 
         class Root(core.Aggregator):
-            def __init__(self, x=2):
+            """An object with a `test` attribute that needs aggregated."""
+
+            def __init__(self, test=2):
                 super().__init__()
-                self._x = x
+                self._test = test
                 self.leaf = Leaf()
                 self.branch = Branch()
 
             @property
-            def x(self):
-                return self._x
+            def test(self):
+                """Return the private `test` attribute."""
+                return self._test
 
         instance = Root()
-        assert instance.x == 7
+        assert instance.test == 7
