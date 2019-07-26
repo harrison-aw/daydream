@@ -27,7 +27,7 @@ __all__ = ['DayDreamError', 'Aggregator']
 from copy import copy
 from functools import reduce
 from operator import add
-from typing import Any, AbstractSet, Set, Optional
+from typing import Any, AbstractSet, Set, Optional, Union
 from dataclasses import dataclass
 
 
@@ -50,6 +50,54 @@ class Condition:
 
     def __str__(self) -> str:
         return self.text
+
+
+class Reference:
+    """Creates a reference to an attribute present in a parent class.
+
+    """
+
+    def refers_to(self, parent: type) -> bool:
+        """
+
+        :param parent:
+        :return:
+        """
+        if isinstance(self._parent, type):
+            result = issubclass(parent, self._parent)
+        elif isinstance(self._parent, str):
+            result = parent.__name__ == self._parent
+        else:
+            raise NotImplementedError('Internal state is unexpected.')
+        return result
+
+    def dereference(self, instance: Any) -> Any:
+        """
+
+        :param instance:
+        :return:
+        """
+        if not self.refers_to(type(instance)):
+            raise AttributeError('Cannot dereference name')
+
+        result = getattr(instance, self._name)
+        if self._payload is not None:
+            result += self._payload
+
+        return result
+
+    def __init__(self,
+                 name: str,
+                 parent: Union[type, str] = 'Character',
+                 payload: Any = None) -> None:
+        self._name = name
+        self._parent = parent
+        self._payload = payload
+
+    def __repr__(self) -> str:
+        return (type(self).__name__
+                + f'{repr(self._name)}, {self._parent.__name__}, '
+                  f'{repr(self._payload)}')
 
 
 def _is_private(name: str) -> bool:

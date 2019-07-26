@@ -289,3 +289,11 @@ class Ability(core.Aggregator,
         else:
             result = NotImplemented
         return result
+
+
+@dataclass(frozen=True)
+class Skill:
+    name: str
+    key_ability: core.Reference
+    trained_only: bool = False
+    armor_check_penalty = False
