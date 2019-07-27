@@ -55,6 +55,10 @@ class Condition:
 class Reference:
     """Creates a reference to an attribute present in a parent class.
 
+    :param name: name of the referenced attribute
+    :param parent: type or name of the object with the reference
+    :param payload: any extra data that should be added to the eventual
+        result
     """
 
     def refers_to(self, parent: type) -> bool:
