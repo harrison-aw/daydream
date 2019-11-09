@@ -20,11 +20,11 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-"""Low-level, core functionality for DayDream3.5"""
+"""Low-level, core functionality for DayDream3.5e"""
 
-__all__ = ['DayDreamError', 'Aggregator']
+__all__ = ['DayDreamError', 'Condition', 'Reference', 'Aggregator']
 
-from copy import copy
+from copy import copy, deepcopy
 from functools import reduce
 from operator import add
 from typing import Any, AbstractSet, Set, Optional, Union
@@ -32,7 +32,7 @@ from dataclasses import dataclass
 
 
 class DayDreamError(Exception):
-    """Error for errors raised by module."""
+    """Error for package-specific issues."""
 
 
 @dataclass(frozen=True)
@@ -56,52 +56,87 @@ class Reference:
     """Creates a reference to an attribute present in a parent class.
 
     :param name: name of the referenced attribute
-    :param parent: type or name of the object with the reference
-    :param payload: any extra data that should be added to the eventual
-        result
+    :param target: type or name of the object with the referenced
+        attribute
+    :param modifier: this is added to the dereferenced value
     """
 
-    def refers_to(self, parent: type) -> bool:
-        """
-
-        :param parent:
-        :return:
-        """
-        if isinstance(self._parent, type):
-            result = issubclass(parent, self._parent)
-        elif isinstance(self._parent, str):
-            result = parent.__name__ == self._parent
-        else:
-            raise NotImplementedError('Internal state is unexpected.')
-        return result
-
     def dereference(self, instance: Any) -> Any:
-        """
+        """Dereference an attribute on the instance.
 
-        :param instance:
-        :return:
-        """
-        if not self.refers_to(type(instance)):
-            raise AttributeError('Cannot dereference name')
+        :param instance: object whose attribute is referenced
 
-        result = getattr(instance, self._name)
-        if self._payload is not None:
-            result += self._payload
+        :return: value of the referenced attribute
+        """
+        if self._refers_to(instance):
+            result = getattr(instance, self._name)
+        else:
+            result = self
+
+        try:
+            modifier = self._modifier.dereference(instance)
+        except (AttributeError, TypeError):
+            if result is self:
+                raise TypeError('Instance type is not referenced')
+            elif self._modifier is not None:
+                result = result + self._modifier
+        else:
+            if result is self:
+                result = deepcopy(self)
+                result._modifier = modifier
+            else:
+                result = result + modifier
 
         return result
 
     def __init__(self,
                  name: str,
-                 parent: Union[type, str] = 'Character',
-                 payload: Any = None) -> None:
+                 target: Union[type, str],
+                 modifier: Optional[Any] = None) -> None:
         self._name = name
-        self._parent = parent
-        self._payload = payload
+        self._target = target
+        self._modifier = modifier
 
     def __repr__(self) -> str:
+        if isinstance(self._target, str):
+            type_name = repr(self._target)
+        else:
+            type_name = self._target.__name__
+
         return (type(self).__name__
-                + f'{repr(self._name)}, {self._parent.__name__}, '
-                  f'{repr(self._payload)}')
+                + f'({repr(self._name)}, {type_name}, {self._modifier})')
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, type(self)):
+            # pylint: disable-msg=protected-access
+            result = (self._name == other._name
+                      and self._target == other._target
+                      and self._modifier == other._modifier)
+        else:
+            result = NotImplemented
+
+        return result
+
+    def __add__(self, other: Any):
+        if self._modifier is None:
+            modifier = other
+        else:
+            modifier = self._modifier + other
+
+        return type(self)(self._name, self._target, modifier)
+    __radd__ = __add__
+
+    def _refers_to(self, instance: Any) -> bool:
+        if not isinstance(instance, type):
+            instance = type(instance)
+
+        if isinstance(self._target, type):
+            result = issubclass(instance, self._target)
+        elif isinstance(self._target, str):
+            result = instance.__name__ == self._target
+        else:
+            raise NotImplementedError('Internal state is unexpected.')
+        return result
 
 
 def _is_private(name: str) -> bool:
@@ -187,6 +222,13 @@ class Aggregator:
             else:
                 raise AttributeError(f'The desired attribute {name} could not'
                                      f' be found')
+
+
+        try:
+            result = result.dereference(self)
+        except (AttributeError, TypeError):
+             pass
+
         return result
 
     def __delattr__(self, name: str) -> None:
