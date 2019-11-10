@@ -27,6 +27,15 @@ import dnd35e.concepts as concepts
 import dnd35e.numbers as num
 
 
+# References
+STR = core.Reference('STR', 'Character')
+DEX = core.Reference('DEX', 'Character')
+CON = core.Reference('CON', 'Character')
+INT = core.Reference('INT', 'Character')
+WIS = core.Reference('WIS', 'Character')
+CHA = core.Reference('CHA', 'Character')
+
+
 # Dice
 D3 = num.Die(3)
 D4 = num.Die(4)
@@ -116,3 +125,25 @@ STABILITY = concepts.Ability(
                      core.Condition('to resist being bull rushed or tripped '
                                     'when standing on the ground')),
 )
+
+
+# Skills
+Appraise = concepts.Skill('Appraise', INT)
+Balance = concepts.Skill('Balance', DEX,
+                         armor_check_penalty=True)
+Bluff = concepts.Skill('Bluff', CHA,
+                       synergies=(concepts.Synergy('diplomacy'),
+                                  concepts.Synergy('intimidate'),
+                                  concepts.Synergy('sleight_of_hand')))
+Climb = concepts.Skill('Climb', STR,
+                       armor_check_penalty=True)
+Concentration = concepts.Skill('Concentration', CON)
+CraftAlchemy = concepts.Skill('Craft (alchemy)', INT,
+                              synergies=(concepts.Synergy(
+                                  'Appraise',
+                                  condition=core.Condition(
+                                      'on checks related to alchemy')),))
+KnowledgeArcana = concepts.Skill('Knowledge (arcana)', INT,
+                                 trained_only=True,
+                                 synergies=(concepts.Synergy('Spellcraft'),))
+

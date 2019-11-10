@@ -24,8 +24,8 @@
 
 __all__ = ['Size', 'AbilityScore']
 
-from typing import Any, Optional, SupportsInt, Iterator, Set, Union
-from dataclasses import dataclass
+from typing import Any, Optional, SupportsInt, Iterator, Set, Union, Tuple
+from dataclasses import dataclass, field
 
 import dnd35e.core as core
 import dnd35e.numbers as num
@@ -291,9 +291,73 @@ class Ability(core.Aggregator,
         return result
 
 
+# TODO add tests
+class Synergy(core.Reference):
+    def __init__(self,
+                 name: str,
+                 target: Union[type, str] = 'Character',
+                 modifier: Optional[Any] = None,
+                 condition: Optional[core.Condition] = None) -> None:
+        super().__init__(name, target, modifier)
+        self._condition = condition
+
+    def dereference(self, instance: Any) -> Any:
+        result = super().dereference(instance)
+        try:
+            if result >= 5:
+                if self._condition is None:
+                    result = num.Modifier(2)
+                else:
+                    result = num.Modifier(2, condition=self._condition)
+            else:
+                result = num.Modifier(0)
+        except TypeError:
+            pass
+
+        return result
+
+
+class _BaseSkill:
+    @property
+    def ranks(self) -> int:
+        return self._ranks
+
+    @property
+    def modifier(self) -> num.Modifier:
+        return num.Modifier(self.ranks)
+
+    def __init__(self, ranks: int) -> None:
+        self._ranks = ranks
+
+    # noinspection PyMethodOverriding
+    def __init_subclass__(cls, *, skill: 'Skill') -> None:
+        super().__init_subclass__()
+        cls._skill = skill
+
+        setattr(cls, skill.key_ability.name, skill.key_ability)
+        for synergy in skill.synergies:
+            setattr(cls, synergy.name, synergy)
+
+
+# TODO add tests
 @dataclass(frozen=True)
 class Skill:
     name: str
     key_ability: core.Reference
     trained_only: bool = False
-    armor_check_penalty = False
+    armor_check_penalty: bool = False
+    synergies: Tuple[Synergy, ...] = field(default_factory=list)
+
+    def __call__(self, ranks: int) -> _BaseSkill:
+        # noinspection PyArgumentList,PyTypeChecker
+        return type(self._class_name(), (_BaseSkill,), {}, skill=self)
+
+    def _class_name(self):
+        return self.name.title()\
+            .replace(' ', '')\
+            .replace('(', '')\
+            .replace(')', '')
+
+
+class Character(core.Aggregator):
+    pass

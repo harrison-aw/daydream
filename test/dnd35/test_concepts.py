@@ -130,3 +130,12 @@ class TestAbility:
         assert ability.test == 10
         del ability.test
         assert ability == concepts.Ability('Test')
+
+
+class TestSkill:
+
+    def test_skill(self):
+        appraise = concepts.Skill('Appraise',
+                                  core.Reference('INT', 'Character'))
+
+        skill = appraise(10)
