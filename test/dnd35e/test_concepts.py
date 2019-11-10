@@ -39,6 +39,26 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+#
+#  Copyright (c) 2019 Anthony Harrison
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to deal
+#  in the Software without restriction, including without limitation the rights
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in all
+#  copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#  SOFTWARE.
 
 """Tests for the concepts module."""
 
@@ -152,10 +172,69 @@ class TestAbility:
         assert ability == concepts.Ability('Test')
 
 
-class TestSkill:
+class TestSynergy:
+    def test_dereference_to_2(self):
+        synergy = concepts.Synergy('bluff')
 
-    def test_skill(self):
+        class Character:
+            def __init__(self, bluff):
+                self.bluff = bluff
+
+        character = Character(10)
+
+        assert int(synergy.dereference(character)) == 2
+
+    def test_dereference_to_0(self):
+        synergy = concepts.Synergy('bluff')
+
+        class Character:
+            def __init__(self, bluff):
+                self.bluff = bluff
+
+        character = Character(4)
+
+        assert int(synergy.dereference(character)) == 0
+
+    def test_dereference_in_nested_reference(self):
+        class Character(core.Aggregator):
+            def __init__(self, cha, bluff, diplomacy):
+                super().__init__()
+                self.CHA = num.Modifier(cha)
+                self.bluff = num.Modifier(bluff)
+                self.diplomacy = core.Reference(
+                    'CHA', 'Character',
+                    concepts.Synergy('bluff',
+                                     modifier=num.Modifier(diplomacy)),
+                )
+
+        character = Character(3, 10, 3)
+
+        # noinspection PyTypeChecker
+        assert int(character.diplomacy) == 8
+
+    def test_repr_evaluates(self):
+        synergy = concepts.Synergy('appraise', 'Character', 4,
+                                   core.Condition(
+                                       'on checks related to alchemy'
+                                   ))
+
+        assert synergy == eval(repr(synergy), {'Synergy': concepts.Synergy,
+                                               'Condition': core.Condition})
+
+
+class TestSkill:
+    def test_ranks(self):
         appraise = concepts.Skill('Appraise',
                                   core.Reference('INT', 'Character'))
 
         skill = appraise(10)
+
+        assert skill.ranks == 10
+
+    def test_modifier(self):
+        appraise = concepts.Skill('Appraise',
+                                  core.Reference('INT', 'Character'))
+
+        skill = appraise(10)
+
+        assert skill.modifier == num.Modifier(10)

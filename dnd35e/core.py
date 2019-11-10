@@ -19,16 +19,36 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+#
+#  Copyright (c) 2019 Anthony Harrison
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to deal
+#  in the Software without restriction, including without limitation the rights
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in all
+#  copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#  SOFTWARE.
 
 """Low-level, core functionality for DayDream3.5e"""
 
 __all__ = ['DayDreamError', 'Condition', 'Reference', 'Aggregator']
 
 from copy import copy, deepcopy
+from dataclasses import dataclass
 from functools import reduce
 from operator import add
 from typing import Any, AbstractSet, Set, Optional, Union
-from dataclasses import dataclass
 
 
 class DayDreamError(Exception):
@@ -68,10 +88,7 @@ class Reference:
 
         :return: value of the referenced attribute
         """
-        if self._refers_to(instance):
-            result = getattr(instance, self._name)
-        else:
-            result = self
+        result = self._dereference_name(instance)
 
         try:
             modifier = self._modifier.dereference(instance)
@@ -141,6 +158,13 @@ class Reference:
             result = instance.__name__ == self._target
         else:
             raise NotImplementedError('Internal state is unexpected.')
+        return result
+
+    def _dereference_name(self, instance):
+        if self._refers_to(instance):
+            result = getattr(instance, self._name)
+        else:
+            result = self
         return result
 
 
@@ -228,11 +252,10 @@ class Aggregator:
                 raise AttributeError(f'The desired attribute {name} could not'
                                      f' be found')
 
-
         try:
             result = result.dereference(self)
         except (AttributeError, TypeError):
-             pass
+            pass
 
         return result
 

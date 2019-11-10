@@ -19,13 +19,33 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+#
+#  Copyright (c) 2019 Anthony Harrison
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to deal
+#  in the Software without restriction, including without limitation the rights
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in all
+#  copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#  SOFTWARE.
 
 """Implements basic concepts used in game rules."""
 
-__all__ = ['Size', 'AbilityScore']
+__all__ = ['Progression', 'Size', 'AbilityScore', ]
 
-from typing import Any, Optional, SupportsInt, Iterator, Set, Union, Tuple
 from dataclasses import dataclass, field
+from typing import Any, Optional, SupportsInt, Iterator, Set, Union, Tuple
 
 import dnd35e.core as core
 import dnd35e.numbers as num
@@ -301,19 +321,31 @@ class Synergy(core.Reference):
         super().__init__(name, target, modifier)
         self._condition = condition
 
-    def dereference(self, instance: Any) -> Any:
-        result = super().dereference(instance)
-        try:
-            if result >= 5:
-                if self._condition is None:
-                    result = num.Modifier(2)
-                else:
-                    result = num.Modifier(2, condition=self._condition)
-            else:
-                result = num.Modifier(0)
-        except TypeError:
-            pass
+    def __repr__(self) -> str:
+        if isinstance(self._target, str):
+            type_name = repr(self._target)
+        else:
+            type_name = self._target.__name__
 
+        return (type(self).__name__
+                + f'({repr(self._name)}, {type_name}, {repr(self._modifier)}, '
+                + f'{repr(self._condition)})')
+
+    def _dereference_name(self, instance):
+        if self._refers_to(instance):
+            result = getattr(instance, self._name)
+            try:
+                if result >= 5:
+                    if self._condition is None:
+                        result = num.Modifier(2)
+                    else:
+                        result = num.Modifier(2, condition=self._condition)
+                else:
+                    result = num.Modifier(0)
+            except TypeError:
+                pass
+        else:
+            result = self
         return result
 
 
@@ -338,8 +370,10 @@ class _BaseSkill:
         for synergy in skill.synergies:
             setattr(cls, synergy.name, synergy)
 
+    def __repr__(self) -> str:
+        return type(self).__name__ + f'({self._ranks})'
 
-# TODO add tests
+
 @dataclass(frozen=True)
 class Skill:
     name: str
@@ -350,7 +384,7 @@ class Skill:
 
     def __call__(self, ranks: int) -> _BaseSkill:
         # noinspection PyArgumentList,PyTypeChecker
-        return type(self._class_name(), (_BaseSkill,), {}, skill=self)
+        return type(self._class_name(), (_BaseSkill,), {}, skill=self)(ranks)
 
     def _class_name(self):
         return self.name.title()\
