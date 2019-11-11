@@ -173,10 +173,16 @@ class TestAbility:
 
 
 class TestSynergy:
+    """Tests for the Synergy class."""
+
     def test_dereference_to_2(self):
+        """Ensure that the proper value is given with enough ranks."""
         synergy = concepts.Synergy('bluff')
 
+        # pylint: disable=too-few-public-methods
         class Character:
+            """Mock character used for dereferencing."""
+
             def __init__(self, bluff):
                 self.bluff = bluff
 
@@ -185,9 +191,12 @@ class TestSynergy:
         assert int(synergy.dereference(character)) == 2
 
     def test_dereference_to_0(self):
+        """Ensure that zero is returned if not enough ranks."""
         synergy = concepts.Synergy('bluff')
 
+        # pylint: disable=too-few-public-methods
         class Character:
+            """Mock character used for dereferencing."""
             def __init__(self, bluff):
                 self.bluff = bluff
 
@@ -196,9 +205,13 @@ class TestSynergy:
         assert int(synergy.dereference(character)) == 0
 
     def test_dereference_in_nested_reference(self):
+        """Ensure that nested references are handled correctly."""
+        # pylint: disable=too-few-public-methods
         class Character(core.Aggregator):
+            """Mock character used for dereferencing."""
             def __init__(self, cha, bluff, diplomacy):
                 super().__init__()
+                # pylint: disable=invalid-name
                 self.CHA = num.Modifier(cha)
                 self.bluff = num.Modifier(bluff)
                 self.diplomacy = core.Reference(
@@ -213,6 +226,7 @@ class TestSynergy:
         assert int(character.diplomacy) == 8
 
     def test_repr_evaluates(self):
+        """Ensure that the repr can be evaluated."""
         synergy = concepts.Synergy('appraise', 'Character', 4,
                                    core.Condition(
                                        'on checks related to alchemy'
@@ -223,7 +237,10 @@ class TestSynergy:
 
 
 class TestSkill:
+    """Tests for the Skill class."""
+
     def test_ranks(self):
+        """Ensure that ranks are tracked."""
         appraise = concepts.Skill('Appraise',
                                   core.Reference('INT', 'Character'))
 
@@ -232,9 +249,11 @@ class TestSkill:
         assert skill.ranks == 10
 
     def test_modifier(self):
+        """Ensure that the modifier accounts for references."""
         appraise = concepts.Skill('Appraise',
                                   core.Reference('INT', 'Character'))
 
         skill = appraise(10)
 
-        assert skill.modifier == num.Modifier(10)
+        assert skill.modifier == core.Reference('INT', 'Character',
+                                                num.Modifier(10))

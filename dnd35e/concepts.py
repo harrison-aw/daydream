@@ -331,25 +331,28 @@ class Ability(core.Aggregator,
         return result
 
 
-# TODO add tests
 class Synergy(core.Reference):
+    """Implements skill synergies in D&D 3.5e.
+
+    :param name: name of the referenced attribute
+    :param target: type or name of the object with the referenced
+        attribute
+    :param modifier: this is added to the dereferenced value
+    :param condition: condition for synergy bonus to apply
+    """
+
     def __init__(self,
                  name: str,
                  target: Union[type, str] = 'Character',
-                 modifier: Optional[Any] = None,
+                 modifier: Any = None,
                  condition: Optional[core.Condition] = None) -> None:
         super().__init__(name, target, modifier)
         self._condition = condition
 
     def __repr__(self) -> str:
-        if isinstance(self._target, str):
-            type_name = repr(self._target)
-        else:
-            type_name = self._target.__name__
-
         return (type(self).__name__
-                + f'({repr(self._name)}, {type_name}, {repr(self._modifier)}, '
-                + f'{repr(self._condition)})')
+                + f'({repr(self._name)}, {self._type_name()}, '
+                + f'{repr(self._modifier)}, {repr(self._condition)})')
 
     def _dereference_name(self, instance):
         if self._refers_to(instance):
@@ -372,11 +375,13 @@ class Synergy(core.Reference):
 class _BaseSkill:
     @property
     def ranks(self) -> int:
+        """Number of ranks invested in skill."""
         return self._ranks
 
     @property
-    def modifier(self) -> num.Modifier:
-        return num.Modifier(self.ranks)
+    def modifier(self) -> core.Reference:
+        """Modifier for rolls related to this skill."""
+        return self._skill.key_ability + num.Modifier(self.ranks)
 
     def __init__(self, ranks: int) -> None:
         self._ranks = ranks
@@ -393,20 +398,40 @@ class _BaseSkill:
     def __repr__(self) -> str:
         return type(self).__name__ + f'({self._ranks})'
 
+    _skill: 'Skill'
+
 
 @dataclass(frozen=True)
 class Skill:
+    # noinspection PyUnresolvedReferences
+    """A skill for a character in D&D 3.5e.
+
+    :param name: name of skill
+    :param key_ability: Ability score that modifies the skill
+    :param trained_only: If True, skill is only usable if ranks have
+        been invested
+    :param armor_check_penalty: If True, skill is penalized by wearing
+        heavy armor
+    :param synergies: References to skills that are increased if at
+        least 5 ranks are invested in this skill
+    """
+
     name: str
     key_ability: core.Reference
     trained_only: bool = False
     armor_check_penalty: bool = False
-    synergies: Tuple[Synergy, ...] = field(default_factory=list)
+    synergies: Tuple[Synergy, ...] = field(default_factory=tuple)
 
     def __call__(self, ranks: int) -> _BaseSkill:
-        # noinspection PyArgumentList,PyTypeChecker
-        return type(self._class_name(), (_BaseSkill,), {}, skill=self)(ranks)
+        # noinspection PyArgumentList,PyTypeChecker,PyUnresolvedReferences
+        class_ = type(self._class_name(),  # type: ignore[call-overload]
+                      (_BaseSkill,),
+                      {},
+                      skill=self)
+        instance: _BaseSkill = class_(ranks)
+        return instance
 
-    def _class_name(self):
+    def _class_name(self) -> str:
         return self.name.title()\
             .replace(' ', '')\
             .replace('(', '')\
@@ -415,12 +440,23 @@ class Skill:
 
 @dataclass(frozen=True)
 class Feat:
+    # noinspection PyUnresolvedReferences
+    """Represents a feat in D&D 3.5e.
+
+    :param name: name of feat
+    :param type: type of feat
+    :param fighter_feat: if True, will be available for a fighter to
+        select as a bonus feat.
+    """
+
     name: str
     type: str = 'General'
     fighter_feat: bool = False
 
 
 class Class:
+    """Represents a character class in D&D 3.5e."""
+
     def __init__(self, name, bab, fort, ref, will, special, **other):
         self._name = name
         self._bab = bab
@@ -429,9 +465,9 @@ class Class:
         self._will = will
         self._special = special
         self._other = tuple(other)
-        for name, value in other.items():
-            setattr(self, '_' + name, value)
+        for other_name, value in other.items():
+            setattr(self, '_' + other_name, value)
 
 
 class Character(core.Aggregator):
-    pass
+    """Represents a character in D&D 3.5e."""

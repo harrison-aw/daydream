@@ -91,42 +91,40 @@ class Reference:
         result = self._dereference_name(instance)
 
         try:
-            modifier = self._modifier.dereference(instance)
+            modifier = self._modifier.dereference(instance)  # type: ignore
         except (AttributeError, TypeError):
             if result is self:
                 raise TypeError('Instance type is not referenced')
-            elif self._modifier is not None:
+
+            if self._modifier is not None:
                 result = result + self._modifier
         else:
             if result is self:
-                result = deepcopy(self)
+                result = deepcopy(result)
+                # pylint: disable=protected-access
                 result._modifier = modifier
             else:
                 result = result + modifier
 
         return result
 
-    # TODO add tests
     @property
     def name(self) -> str:
+        """Returns the name of the referenced attribute."""
         return self._name
 
     def __init__(self,
                  name: str,
                  target: Union[type, str],
-                 modifier: Optional[Any] = None) -> None:
+                 modifier: Any = None) -> None:
         self._name = name
         self._target = target
         self._modifier = modifier
 
     def __repr__(self) -> str:
-        if isinstance(self._target, str):
-            type_name = repr(self._target)
-        else:
-            type_name = self._target.__name__
-
         return (type(self).__name__
-                + f'({repr(self._name)}, {type_name}, {self._modifier})')
+                + f'({repr(self._name)}, {self._type_name()}, '
+                + f'{repr(self._modifier)})')
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, type(self)):
@@ -139,7 +137,7 @@ class Reference:
 
         return result
 
-    def __add__(self, other: Any):
+    def __add__(self, other: Any) -> 'Reference':
         if self._modifier is None:
             modifier = other
         else:
@@ -166,6 +164,13 @@ class Reference:
         else:
             result = self
         return result
+
+    def _type_name(self):
+        if isinstance(self._target, str):
+            type_name = repr(self._target)
+        else:
+            type_name = self._target.__name__
+        return type_name
 
 
 def _is_private(name: str) -> bool:

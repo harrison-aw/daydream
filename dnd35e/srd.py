@@ -150,24 +150,24 @@ RAGE = concepts.Ability
 
 
 # Skills
-Appraise = concepts.Skill('Appraise', INT)
-Balance = concepts.Skill('Balance', DEX,
+APPRAISE = concepts.Skill('Appraise', INT)
+BALANCE = concepts.Skill('Balance', DEX,
                          armor_check_penalty=True)
-Bluff = concepts.Skill('Bluff', CHA,
+BLUFF = concepts.Skill('Bluff', CHA,
                        synergies=(concepts.Synergy('diplomacy'),
                                   concepts.Synergy('intimidate'),
                                   concepts.Synergy('sleight_of_hand')))
-Climb = concepts.Skill('Climb', STR,
+CLIMB = concepts.Skill('Climb', STR,
                        armor_check_penalty=True)
-Concentration = concepts.Skill('Concentration', CON)
-CraftAlchemy = concepts.Skill('Craft (alchemy)', INT,
-                              synergies=(concepts.Synergy(
-                                  'Appraise',
-                                  condition=core.Condition(
-                                      'on checks related to alchemy')),))
-KnowledgeArcana = concepts.Skill('Knowledge (arcana)', INT,
-                                 trained_only=True,
-                                 synergies=(concepts.Synergy('Spellcraft'),))
+CONCENTRATION = concepts.Skill('Concentration', CON)
+CRAFT_ALCHEMY = concepts.Skill('Craft (alchemy)', INT,
+                               synergies=(concepts.Synergy(
+                                   'Appraise',
+                                   condition=core.Condition(
+                                       'on checks related to alchemy')),))
+KNOWLEDGE_ARCANA = concepts.Skill('Knowledge (arcana)', INT,
+                                  trained_only=True,
+                                  synergies=(concepts.Synergy('Spellcraft'),))
 
 
 # Feats
