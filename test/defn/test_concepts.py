@@ -21,30 +21,12 @@
 #  SOFTWARE.
 """Tests for the concepts module."""
 
-import dnd35e.concepts as concepts
-import dnd35e.core as core
-import dnd35e.numbers as num
+import defn.concepts as concepts
+import defn.core as core
+import defn.numbers as num
 
 
 # pylint: disable=no-self-use, eval-used
-
-
-class TestProgression:
-    """Tests for the progression class."""
-
-    def test_create_save(self):
-        """Ensure that a progression is correctly structured."""
-        good_save = concepts.Progression(num.ModifierType('save'),
-                                         2, 3, 3, 4, 4)
-        assert good_save[2] == num.Modifier(3, num.ModifierType('save'))
-
-    def test_repr_evaluates(self):
-        """Ensure that the repr can recreate a progression."""
-        good_save = concepts.Progression(num.ModifierType('save'),
-                                         2, 3, 3, 4, 4)
-        namespace = {'Progression': concepts.Progression,
-                     'ModifierType': num.ModifierType}
-        assert eval(repr(good_save), namespace) == good_save
 
 
 class TestSize:

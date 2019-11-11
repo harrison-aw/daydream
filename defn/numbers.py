@@ -21,17 +21,20 @@
 #  SOFTWARE.
 """Classes and helper function for working with numerical values."""
 
-__all__ = ['Die', 'DicePool', 'ordinal']
+__all__ = ['ordinal', 'Die', 'DicePool', 'ModifierType', 'Modifier',
+           'ModifierCombinationError', 'DifferentModifierTypesError',
+           'BonusAndPenaltyCombinationError', 'DifferentConditionsError',
+           'Modifier', 'ModifierTotal']
 
 from typing import Tuple, List, Any, Union, DefaultDict, Dict, Optional, \
-    overload
+    overload, Iterator
 from copy import deepcopy
 from collections import defaultdict
 from itertools import chain
 from functools import total_ordering
 from dataclasses import dataclass
 
-import dnd35e.core as core
+import defn.core as core
 
 
 _ORDINALS = ('zeroth', 'first', 'second', 'third', 'fourth', 'fifth',
@@ -407,3 +410,42 @@ class ModifierTotal:
         return result
 
     __radd__ = __add__
+
+
+class Progression:
+    """A progression of modifiers.
+
+    :param modifier_name: name of modifier in progression, defines
+        modifier type
+    :param values: the values of the modifiers in the the progression
+    """
+
+    def __init__(self, modifier_type: ModifierType, *values: int) -> None:
+        self._modifiers = [Modifier(v, modifier_type)
+                           for v in values]
+
+    def __repr__(self) -> str:
+        values = ', '.join(str(int(m)) for m in self._modifiers)
+        if values:
+            modifier_type = repr(self._modifiers[0].type)
+            values = ', ' + values
+        else:
+            modifier_type = ''
+        return type(self).__name__ + f"({modifier_type}{values})"
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, Progression):
+            # pylint: disable=protected-access
+            result = self._modifiers == other._modifiers
+        else:
+            result = NotImplemented
+        return result
+
+    def __len__(self) -> int:
+        return len(self._modifiers)
+
+    def __getitem__(self, item: int) -> Modifier:
+        return self._modifiers[item]
+
+    def __iter__(self) -> Iterator[Modifier]:
+        return iter(self._modifiers)

@@ -21,7 +21,7 @@
 #  SOFTWARE.
 """Tests for core functionality."""
 
-import dnd35e.core as core
+import defn.core as core
 
 # pylint: disable=no-self-use
 
