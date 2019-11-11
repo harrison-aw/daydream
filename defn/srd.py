@@ -140,6 +140,8 @@
 #     The Hypertext d20 SRD Copyright 2004, Jans W Carton; transferred
 #     to BoLS Interactive, 2016.
 #
+#     daydream Copyright 2019, Anthony Harrison
+#
 # END OF LICENSE
 """Definitions from the SRD."""
 

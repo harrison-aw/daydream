@@ -140,7 +140,7 @@
 #     The Hypertext d20 SRD Copyright 2004, Jans W Carton; transferred
 #     to BoLS Interactive, 2016.
 #
-#     DayDream Copyright 2019, Anthony Harrison
+#     daydream Copyright 2019, Anthony Harrison
 #
 # END OF LICENSE
 """Implements basic concepts used in game rules."""
