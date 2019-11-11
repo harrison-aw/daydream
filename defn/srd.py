@@ -144,11 +144,9 @@
 #
 # END OF LICENSE
 """Definitions from the SRD."""
-
-import defn.concepts as concepts
 import defn.core as core
-import defn.numbers
 import defn.numbers as num
+import defn.concepts as concepts
 
 # References
 STR = core.Reference('STR', 'Character')
@@ -194,26 +192,26 @@ BASE_ATTACK = num.ModifierType('base attack')
 
 
 # Base saving throw progressions
-GOOD_BASE_SAVE = defn.numbers.Progression(
+GOOD_BASE_SAVE = num.Progression(
     BASE_SAVE,
     2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12,
 )
-POOR_BASE_SAVE = defn.numbers.Progression(
+POOR_BASE_SAVE = num.Progression(
     BASE_SAVE,
     0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6,
 )
 
 
 # Base attack bonus progressions
-GOOD_BASE_ATTACK = defn.numbers.Progression(
+GOOD_BASE_ATTACK = num.Progression(
     BASE_ATTACK,
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
 )
-AVERAGE_BASE_ATTACK = defn.numbers.Progression(
+AVERAGE_BASE_ATTACK = num.Progression(
     BASE_ATTACK,
     0, 1, 2, 3, 3, 4, 5, 6, 6, 7, 8, 9, 9, 10, 11, 12, 12, 13, 14, 15,
 )
-POOR_BASE_ATTACK = defn.numbers.Progression(
+POOR_BASE_ATTACK = num.Progression(
     BASE_ATTACK,
     0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,
 )
@@ -239,14 +237,14 @@ STONECUNNING = concepts.Ability(
     'Stonecunning',
     search=num.Modifier(+2,
                         RACIAL,
-                        core.Condition('to notice unusual stonework')),
+                        num.Condition('to notice unusual stonework')),
 )
 STABILITY = concepts.Ability(
     'Stability',
     STR=num.Modifier(+4,
                      UNTYPED,
-                     core.Condition('to resist being bull rushed or tripped '
-                                    'when standing on the ground')),
+                     num.Condition('to resist being bull rushed or tripped '
+                                   'when standing on the ground')),
 )
 FAST_MOVEMENT = concepts.Ability('Fast movement')
 ILLITERACY = concepts.Ability('Illiteracy')
@@ -267,7 +265,7 @@ CONCENTRATION = concepts.Skill('Concentration', CON)
 CRAFT_ALCHEMY = concepts.Skill('Craft (alchemy)', INT,
                                synergies=(concepts.Synergy(
                                    'Appraise',
-                                   condition=core.Condition(
+                                   condition=num.Condition(
                                        'on checks related to alchemy')),))
 KNOWLEDGE_ARCANA = concepts.Skill('Knowledge (arcana)', INT,
                                   trained_only=True,

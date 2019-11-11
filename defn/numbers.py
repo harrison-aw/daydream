@@ -145,10 +145,10 @@
 # END OF LICENSE
 """Classes and helper function for working with numerical values."""
 
-__all__ = ['ordinal', 'Die', 'DicePool', 'ModifierType', 'Modifier',
-           'ModifierCombinationError', 'DifferentModifierTypesError',
-           'BonusAndPenaltyCombinationError', 'DifferentConditionsError',
-           'Modifier', 'ModifierTotal']
+__all__ = ['ordinal', 'Condition', 'Die', 'DicePool', 'ModifierType',
+           'Modifier', 'ModifierCombinationError',
+           'DifferentModifierTypesError', 'BonusAndPenaltyCombinationError',
+           'DifferentConditionsError', 'Modifier', 'ModifierTotal']
 
 from typing import Tuple, List, Any, Union, DefaultDict, Dict, Optional, \
     overload, Iterator
@@ -206,6 +206,23 @@ def ordinal(value):  # pylint: disable-msg=function-redefined
     else:
         raise NotImplementedError(f'Unable to convert {type(value)}')
     return result
+
+
+@dataclass(frozen=True)
+class Condition:
+    """A specific situation to which some kind of bonus applies.
+
+    For example, in the SRD "[a specialist wizard] gains a +2 bonus on
+    Spellcraft checks to learn the spells of her chosen school." The
+    condition text here would be "to learn the spells of her chosen
+    school" which gives the limited conditions in which the bonus
+    applies.
+    """
+
+    text: str
+
+    def __str__(self) -> str:
+        return self.text
 
 
 @total_ordering
@@ -387,7 +404,7 @@ class Modifier:
 
     value: int = 0
     type: ModifierType = UNTYPED
-    condition: Optional[core.Condition] = None
+    condition: Optional[Condition] = None
 
     @property
     def is_bonus(self) -> bool:
@@ -475,7 +492,7 @@ class Modifier:
         return self.value
 
 
-_ModifierKey = Tuple[ModifierType, bool, Optional[core.Condition]]
+_ModifierKey = Tuple[ModifierType, bool, Optional[Condition]]
 
 
 def _key(modifier: Modifier) -> _ModifierKey:
@@ -490,14 +507,14 @@ class ModifierTotal:
     :param modifiers: a collection of modifiers
     """
 
-    def value(self, *conditions_met: core.Condition) -> int:
+    def value(self, *conditions_met: Condition) -> int:
         """Get the numerical value of the total."""
         return sum(mod.value for mod in self._modifiers.values()
                    if (mod.condition is None
                        or mod.condition in conditions_met))
 
     @property
-    def conditions(self) -> List[core.Condition]:
+    def conditions(self) -> List[Condition]:
         """Get all of the conditions present in modifiers."""
         return [key[2] for key in self._modifiers if key[2] is not None]
 

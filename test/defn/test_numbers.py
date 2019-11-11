@@ -23,8 +23,6 @@
 
 import pytest
 
-import defn.core as core
-import defn.numbers
 import defn.numbers as num
 
 # pylint: disable=no-self-use, eval-used
@@ -149,7 +147,7 @@ class TestModifier:
         """Ensure that a conditional modifier is represented correctly."""
         mod = num.Modifier(
             value=2,
-            condition=core.Condition('to learn the spells of her chosen school')
+            condition=num.Condition('to learn the spells of her chosen school')
         )
         assert (str(mod)
                 == '+2 untyped bonus to learn the spells of her chosen school')
@@ -226,13 +224,13 @@ class TestModifierTotal:
         static_mod = num.Modifier(3, num.ModifierType('ability'))
         conditional_mod = num.Modifier(
             value=2,
-            condition=core.Condition('to learn the spells of her chosen school')
+            condition=num.Condition('to learn the spells of her chosen school')
         )
         total = num.ModifierTotal(static_mod, conditional_mod)
         namespace = {'ModifierTotal': num.ModifierTotal,
                      'Modifier': num.Modifier,
                      'ModifierType': num.ModifierType,
-                     'Condition': core.Condition}
+                     'Condition': num.Condition}
         assert eval(repr(total), namespace) == total
 
     def test_value_of_total_with_static_modifiers(self):
@@ -246,7 +244,7 @@ class TestModifierTotal:
         static_mod = num.Modifier(3, num.ModifierType('ability'))
         conditional_mod = num.Modifier(
             value=2,
-            condition=core.Condition('to learn the spells of her chosen school')
+            condition=num.Condition('to learn the spells of her chosen school')
         )
         total = num.ModifierTotal(static_mod, conditional_mod)
         assert total.value(*total.conditions) == 5
@@ -280,14 +278,14 @@ class TestProgression:
 
     def test_create_save(self):
         """Ensure that a progression is correctly structured."""
-        good_save = defn.numbers.Progression(num.ModifierType('save'),
-                                             2, 3, 3, 4, 4)
+        good_save = num.Progression(num.ModifierType('save'),
+                                    2, 3, 3, 4, 4)
         assert good_save[2] == num.Modifier(3, num.ModifierType('save'))
 
     def test_repr_evaluates(self):
         """Ensure that the repr can recreate a progression."""
-        good_save = defn.numbers.Progression(num.ModifierType('save'),
-                                             2, 3, 3, 4, 4)
-        namespace = {'Progression': defn.numbers.Progression,
+        good_save = num.Progression(num.ModifierType('save'),
+                                    2, 3, 3, 4, 4)
+        namespace = {'Progression': num.Progression,
                      'ModifierType': num.ModifierType}
         assert eval(repr(good_save), namespace) == good_save

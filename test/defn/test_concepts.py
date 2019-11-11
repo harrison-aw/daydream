@@ -20,10 +20,9 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 """Tests for the concepts module."""
-
-import defn.concepts as concepts
 import defn.core as core
 import defn.numbers as num
+import defn.concepts as concepts
 
 
 # pylint: disable=no-self-use, eval-used
@@ -99,7 +98,7 @@ class TestAbility:
             'Stonecunning',
             search=num.Modifier(2,
                                 num.ModifierType('racial'),
-                                core.Condition('to notice unusual stonework'))
+                                num.Condition('to notice unusual stonework'))
         )
         assert str(stonecunning.search) == '+2 racial bonus to notice' \
                                            ' unusual stonework'
@@ -169,12 +168,12 @@ class TestSynergy:
     def test_repr_evaluates(self):
         """Ensure that the repr can be evaluated."""
         synergy = concepts.Synergy('appraise', 'Character', 4,
-                                   core.Condition(
+                                   num.Condition(
                                        'on checks related to alchemy'
                                    ))
 
         assert synergy == eval(repr(synergy), {'Synergy': concepts.Synergy,
-                                               'Condition': core.Condition})
+                                               'Condition': num.Condition})
 
 
 class TestSkill:

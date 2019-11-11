@@ -145,8 +145,8 @@
 # END OF LICENSE
 """Implements basic concepts used in game rules."""
 
-__all__ = ['Size', 'AbilityScore', 'AbilityType', 'Ability', 'Synergy',
-           'Skill', 'Feat', 'Class', 'Character']
+__all__ = ['Size', 'AbilityScore', 'AbilityType',
+           'Ability', 'Synergy', 'Skill', 'Feat', 'Class', 'Character']
 
 from dataclasses import dataclass, field
 from typing import Any, Optional, SupportsInt, Set, Union, Tuple
@@ -385,7 +385,7 @@ class Synergy(core.Reference):
                  name: str,
                  target: Union[type, str] = 'Character',
                  modifier: Any = None,
-                 condition: Optional[core.Condition] = None) -> None:
+                 condition: Optional[num.Condition] = None) -> None:
         super().__init__(name, target, modifier)
         self._condition = condition
 
